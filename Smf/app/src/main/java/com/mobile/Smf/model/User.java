@@ -5,12 +5,17 @@ public class User {
     private int id;
     private String userName;
     private String password;
-    private int birthYear;
-    private String country;
     private String email;
+    private String country;
+    private int birthYear;
 
-    public User(){
-
+    public User(int id, String userName, String password, String email, String country, int birthYear){
+        this.id = id;
+        this.userName = userName;
+        this.password = password;
+        this.email = email;
+        this.country = country;
+        this.birthYear = birthYear;
     }
 
 
