@@ -16,7 +16,7 @@ public class Feed {
     private List<Post> feed;
 
     private Feed(){
-
+        fillFeed();
     }
 
     public Feed getFeedSingleton(){
@@ -26,6 +26,14 @@ public class Feed {
 
     public List<Post> getFeedAsList(){
         return feed;
+    }
+
+    /*
+    * Intended for debugging
+    * todo rework
+    * */
+    public void fillFeed(){
+        feed = datainterface.getAllPosts();
     }
 
 }

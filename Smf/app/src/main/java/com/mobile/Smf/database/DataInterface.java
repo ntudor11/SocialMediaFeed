@@ -1,5 +1,5 @@
 /*
-* Handles serving data from MySQL server and local SQLite, as well as recieving and storing data.
+* Handles serving data from MySQL server and local SQLite, as well as receiving and storing data.
 */
 
 package com.mobile.Smf.database;
@@ -53,7 +53,7 @@ public class DataInterface {
     * @return newly created user
     * */
     public User addNewUser(String userName, String password, String email, String country, int birthYear){
-        User newUser = new User();
+        User newUser = new User(1,"test user","test","test@test.test","test land",2019);
         return newUser;
     }
 
@@ -62,7 +62,7 @@ public class DataInterface {
     * @return User currently logged in user
     * */
     public User getLoggedInUser(){
-        User currentUser = new User();
+        User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
         return currentUser;
     }
 
