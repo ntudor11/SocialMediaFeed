@@ -2,7 +2,7 @@
 * Handles serving data from MySQL server and local SQLite, as well as recieving and storing data.
 */
 
-package com.mobile.Smf;
+package com.mobile.Smf.database;
 
 import com.mobile.Smf.model.Post;
 import com.mobile.Smf.model.User;

@@ -1,6 +1,5 @@
-package com.mobile.Smf;
+package com.mobile.Smf.database;
 
-import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,12 +8,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mobile.Smf.R;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.sql.*;
 
 public class DataBase extends AppCompatActivity {
 

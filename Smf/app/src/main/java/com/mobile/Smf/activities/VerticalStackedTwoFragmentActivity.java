@@ -9,25 +9,26 @@ import com.mobile.Smf.R;
 
 public abstract class VerticalStackedTwoFragmentActivity extends  AppCompatActivity{
 
-    protected abstract Fragment createFragment();
+    protected abstract Fragment createUpperFragment();
+    protected abstract Fragment createLowerFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.single_fragment_activity_layout);
+        setContentView(R.layout.activity_single_fragment);
 
         FragmentManager fm = getSupportFragmentManager();
         Fragment upperFragment = fm.findFragmentById(R.id.upper_fragment_container);
         Fragment lowerFragment = fm.findFragmentById(R.id.lower_fragment_container) ;
 
         if (upperFragment == null){
-            upperFragment = createFragment();
+            upperFragment = createUpperFragment();
             fm.beginTransaction()
                     .add(R.id.upper_fragment_container, upperFragment)
                     .commit();
         }
         if (lowerFragment == null) {
-            lowerFragment = createFragment();
+            lowerFragment = createLowerFragment();
             fm.beginTransaction()
                     .add(R.id.lower_fragment_container, lowerFragment)
                     .commit();

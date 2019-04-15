@@ -5,7 +5,7 @@
 
 package com.mobile.Smf.model;
 
-import com.mobile.Smf.DataInterface;
+import com.mobile.Smf.database.DataInterface;
 
 import java.util.List;
 
