@@ -4,16 +4,23 @@
 
 package com.mobile.Smf.database;
 
+
 import com.mobile.Smf.model.Post;
 import com.mobile.Smf.model.User;
+import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataInterface {
 
-    public DataInterface(){
+    MySql mySql;
+    SqLite sqLite;
 
+    public DataInterface(Context context){
+
+        mySql = MySql.getMySql();
+        sqLite = SqLite.getSqLite(context);
     }
 
     /*

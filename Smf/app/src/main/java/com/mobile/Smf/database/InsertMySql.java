@@ -1,4 +1,4 @@
-package com.mobile.Smf;
+package com.mobile.Smf.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

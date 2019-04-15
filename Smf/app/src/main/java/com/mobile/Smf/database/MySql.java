@@ -1,5 +1,7 @@
-package com.mobile.Smf;
+package com.mobile.Smf.database;
 
+
+import com.mobile.Smf.model.User;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
