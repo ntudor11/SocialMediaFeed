@@ -116,7 +116,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewUsername.setText(pPost.getUserName());
             textViewTimestamp.setText(pPost.getTimeStampAsStr());
             imageViewPicture.setImageBitmap(pPost.getPicture());
-            imageViewPicture.setVisibility(View.VISIBLE); //todo show image
         }
     }
 
