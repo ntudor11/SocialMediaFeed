@@ -7,7 +7,7 @@
     <string name="login_button_text">Log in</string>
     <string name="login_signup_button_text">Sign up</string>
 
-    <!--signup-->
+    <!--signup fragment-->
     <string name="signup_username">Username: </string>
     <string name="signup_password">Password: </string>
     <string name="signup_email">Email: </string>

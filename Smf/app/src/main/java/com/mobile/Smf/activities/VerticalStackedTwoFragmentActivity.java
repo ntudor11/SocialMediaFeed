@@ -15,7 +15,7 @@ public abstract class VerticalStackedTwoFragmentActivity extends  AppCompatActiv
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_single_fragment);
+        setContentView(R.layout.activity_vertically_stacked_two_fragments);
 
         FragmentManager fm = getSupportFragmentManager();
         Fragment upperFragment = fm.findFragmentById(R.id.upper_fragment_container);
