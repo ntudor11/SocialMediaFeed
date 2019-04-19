@@ -53,14 +53,14 @@ public class LoginFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                String userName = usernameEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
-                if (dataInterface.checkIfValidLogin(userName,password)){
-                    Intent intent = new Intent(getContext(), FeedActivity.class);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(getContext(),"Invalid Login", Toast.LENGTH_SHORT).show();
-                }
+            String userName = usernameEditText.getText().toString();
+            String password = passwordEditText.getText().toString();
+            if (dataInterface.checkIfValidLogin(userName,password)){
+                Intent intent = new Intent(getContext(), FeedActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(),"Invalid Login", Toast.LENGTH_SHORT).show();
+            }
             }
         });
 
