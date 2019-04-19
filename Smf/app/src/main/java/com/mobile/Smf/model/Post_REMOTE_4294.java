@@ -4,11 +4,6 @@ import java.util.Date;
 
 public class Post {
 
-<<<<<<< HEAD
-    int id;
-
-    public Post(){
-=======
     private int postID;
     private String userName;
     private Date timeStamp;
@@ -38,7 +33,6 @@ public class Post {
     public Date getTimeStamp() {
         return timeStamp;
     }
->>>>>>> f5ad993bb1b1f7a9c12fe367a5bac75d66ebcabb
 
     public void setTimeStamp(Date timeStamp) {
         this.timeStamp = timeStamp;

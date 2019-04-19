@@ -1,6 +1,37 @@
 <resources>
     <string name="app_name">Smf</string>
+<<<<<<< HEAD
     <string name="title_feed">Feed</string>
     <string name="title_makepost">Post</string>
     <string name="title_account">Account</string>
+=======
+
+    <!--login fragment-->
+    <string name="login_username">Username: </string>
+    <string name="login_password">Password: </string>
+    <string name="login_button_text">Log in</string>
+    <string name="login_signup_button_text">Sign up</string>
+
+    <!--signup-->
+    <string name="signup_username">Username: </string>
+    <string name="signup_password">Password: </string>
+    <string name="signup_email">Email: </string>
+    <string name="signup_country">Country: </string>
+    <string name="signup_birthYear">Birth year: </string>
+    <string-array name="signup_country_spinner">
+        <item>Denmark</item>
+        <item>England</item>
+        <item>France</item>
+        <item>Germany</item>
+        <item>Ireland</item>
+        <item>Norway</item>
+        <item>Scotland</item>
+        <item>Sweden</item>
+        <item>United States</item>
+    </string-array>
+    <string name="signup_button_createaccount">Create account</string>
+    <string name="signup_button_backtologin">Log in</string>
+
+
+>>>>>>> f5ad993bb1b1f7a9c12fe367a5bac75d66ebcabb
 </resources>

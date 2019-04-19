@@ -2,28 +2,33 @@ package com.mobile.Smf.activities;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.support.design.widget.BottomNavigationView;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
-
-
 import com.mobile.Smf.R;
-import com.mobile.Smf.database.DataInterface;
+
 
 public class ButtomNavigationBar extends Fragment {
 
-    //DataInterface dataInterface;
-    BottomNavigationView navigation;
+    private BottomNavigationView navigation;
+    private Dialog dialog;
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -47,7 +52,6 @@ public class ButtomNavigationBar extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //dataInterface = new DataInterface(getContext());
     }
 
     @Override
@@ -64,16 +68,26 @@ public class ButtomNavigationBar extends Fragment {
 
     public void makePostDialog(Context context, BottomNavigationView view) {
 
-        final Dialog dialog = new Dialog(context);
+
+        //make the dialog
+        dialog = new Dialog(context);
         dialog.setContentView(R.layout.makepost_dialog);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         ImageView text = dialog.findViewById(R.id.textpost);
         ImageView photo = dialog.findViewById(R.id.photopost);
 
-        Drawable textIcon = text.getDrawable();
-        textIcon.setBounds(0, 0, 50, 50);
-        Drawable photoIcon = photo.getDrawable();
-        photoIcon.setBounds(0, 0, 50, 50);
+        text.setScaleX(2.00f);
+        text.setScaleY(2.00f);
+        photo.setScaleX(2.00f);
+        photo.setScaleY(2.00f);
+
+        Window window = dialog.getWindow();
+        WindowManager.LayoutParams param = window.getAttributes();
+        param.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+        param.y = 140;
+        window.setAttributes(param);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
         text.setOnClickListener(new View.OnClickListener() {
 
@@ -101,7 +115,7 @@ public class ButtomNavigationBar extends Fragment {
             }
         });
 
-
+    dialog.show();
     }
 
 }
