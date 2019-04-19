@@ -8,6 +8,7 @@ package com.mobile.Smf.database;
 import com.mobile.Smf.model.Post;
 import com.mobile.Smf.model.User;
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,7 @@ public class DataInterface {
     * @param numberOfPosts int number of new posts to get
     * @return List<Post> returns a list of posts to be prepended
     * */
-    public List<Post> getSpecificNumberNewerOfPosts(int numberOfPosts){
+    public List<Post> getSpecificNumberOfNewerPosts(int numberOfPosts){
         List<Post> returnList = new ArrayList<>();
         return returnList;
     }
@@ -93,5 +94,33 @@ public class DataInterface {
     public List<Post> getSpecificNumberOfLowerPosts(int numberOfPosts){
         List<Post> returnList = new ArrayList<>();
         return returnList;
+    }
+
+    /*
+    * uploads a new TextPost to MySql server.
+    * @param username String the user who posted the text
+    * @param text String the text of the post
+    * @return boolean true if successful upload, false if upload fails
+    * */
+    public boolean uploadTextPost(String username, String text){
+        return true;
+    }
+
+    /*
+     * uploads a new PicturePost to MySql server.
+     * @param username String the user who posted the text
+     * @param picture the picture of the post as a Bitmap
+     * @return boolean true if successful upload, false if upload fails
+     * */
+    public boolean uploadPicturePost(String username, Bitmap picture){
+        return true;
+    }
+
+    /*
+    * Should log the user out of the system, by deleteing all local data associated with the user
+    * @return boolean true if succesfully deleted all local user data, false otherwise
+    * */
+    public boolean logCurrentUserOut(){
+        return true;
     }
 }
