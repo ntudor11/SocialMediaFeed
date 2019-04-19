@@ -12,16 +12,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.LoginActivity">
+        <activity android:name=".activities.DevActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
             </intent-filter>
         </activity>
+        <activity android:name=".activities.LoginActivity"> <!-- todo make main and launcher -->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN"></action>-->
+                <!--<category android:name="android.intent.category.LAUNCHER"></category>-->
+            <!--</intent-filter>-->
+        </activity>
         <activity android:name=".activities.SignupActivity"></activity>
         <activity android:name=".activities.FeedActivity"></activity>
         <activity android:name=".activities.MakeTextPostActivity"></activity>
         <activity android:name=".activities.MakePicturePostActivity"></activity>
+        <activity android:name=".activities.ProfileActivity"></activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
