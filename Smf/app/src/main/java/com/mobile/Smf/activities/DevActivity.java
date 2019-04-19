@@ -66,17 +66,8 @@ public class DevActivity extends AppCompatActivity {
             }
         });
 
-        button5.setText("MakePicturePost");
+        button5.setText("MakeTextPost");
         button5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MakePicturePostActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        button6.setText("MakeTextPost");
-        button6.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), MakeTextPostActivity.class);
@@ -84,6 +75,14 @@ public class DevActivity extends AppCompatActivity {
             }
         });
 
+        button6.setText("MakePicturePost");
+        button6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), MakePicturePostActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 

@@ -56,10 +56,10 @@ public class ProfileFragment extends Fragment {
         textViewUsernameData.setText(user.getUserName());
         textViewEmailData.setText(user.getEmail());
         textViewCountryData.setText(user.getCountry());
-        textViewBirthYearData.setText(user.getBirthYear());
+        textViewBirthYearData.setText(user.getBirthYearAsString());
 
         buttonLogout = profileView.findViewById(R.id.profile_button_logout);
-
+        buttonLogout.setText(R.string.profile_button_logout);
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

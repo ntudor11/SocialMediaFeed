@@ -19,6 +19,10 @@ public class User {
     }
 
 
+    public String getBirthYearAsString(){
+        return "" + birthYear;
+    }
+
     public String getCountry() {
         return country;
     }

@@ -36,5 +36,6 @@
     <string name="profile_email_desc">Email: </string>
     <string name="profile_country_desc">Country: </string>
     <string name="profile_birthyear_desc">Birthyear: </string>
+    <string name="profile_button_logout">Log out</string>
 
 </resources>
