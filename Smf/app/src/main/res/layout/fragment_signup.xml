@@ -5,8 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_gravity="center"
-    android:background="@drawable/gradient"
+    android:background="@drawable/bg"
     android:paddingTop="20dp"
+    android:fontFamily="@font/nexab"
     >
 
     <!--username-->
@@ -20,6 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/signup_textview_username"
+            android:fontFamily="@font/nexab"
             />
         <EditText
             android:layout_width="wrap_content"
