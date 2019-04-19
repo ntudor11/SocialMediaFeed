@@ -115,4 +115,12 @@ public class DataInterface {
     public boolean uploadPicturePost(String username, Bitmap picture){
         return true;
     }
+
+    /*
+    * Should log the user out of the system, by deleteing all local data associated with the user
+    * @return boolean true if succesfully deleted all local user data, false otherwise
+    * */
+    public boolean logCurrentUserOut(){
+        return true;
+    }
 }

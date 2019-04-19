@@ -31,4 +31,10 @@
     <string name="maketextpost_header">Make a new text post:</string>
     <string name="maketextpost_uploadbutton">Post!</string>
 
+    <!--profile fragment-->
+    <string name="profile_username_desc">Username: </string>
+    <string name="profile_email_desc">Email: </string>
+    <string name="profile_country_desc">Country: </string>
+    <string name="profile_birthyear_desc">Birthyear: </string>
+
 </resources>
