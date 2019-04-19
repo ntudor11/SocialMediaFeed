@@ -27,5 +27,8 @@
     <string name="signup_button_createaccount">Create account</string>
     <string name="signup_button_backtologin">Log in</string>
 
+    <!--maketextpost fragment-->
+    <string name="maketextpost_header">Make a new text post:</string>
+    <string name="maketextpost_uploadbutton">Post!</string>
 
 </resources>
