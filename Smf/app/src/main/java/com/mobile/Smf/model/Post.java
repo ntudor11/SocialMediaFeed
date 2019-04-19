@@ -2,6 +2,7 @@ package com.mobile.Smf.model;
 
 import com.mobile.Smf.util.PostTypeInterface;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public abstract class Post implements PostTypeInterface {
@@ -19,7 +20,7 @@ public abstract class Post implements PostTypeInterface {
     }
 
     public String getTimeStampAsStr(){
-        return timeStamp.toString();
+        return new SimpleDateFormat("hh:mm dd/MM yyyy").format(timeStamp);
     }
 
     public int getPostID() {

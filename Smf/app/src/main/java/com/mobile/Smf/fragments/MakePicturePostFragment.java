@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,6 +134,8 @@ public class MakePicturePostFragment extends Fragment {
         display.getSize(size);
         int width = size.x;
         int height = size.y;
+        // Log.e("derp",""+width); //1080
+        // Log.e("derp",""+height); //1794
 
 
         // todo proper implementation
