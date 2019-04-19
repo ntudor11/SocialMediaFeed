@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Smf</string>
+<<<<<<< HEAD
+    <string name="title_feed">Feed</string>
+    <string name="title_makepost">Post</string>
+    <string name="title_account">Account</string>
+=======
 
     <!--login fragment-->
     <string name="login_username">Username: </string>
@@ -38,4 +43,5 @@
     <string name="profile_birthyear_desc">Birthyear: </string>
     <string name="profile_button_logout">Log out</string>
 
+>>>>>>> f5ad993bb1b1f7a9c12fe367a5bac75d66ebcabb
 </resources>
