@@ -1,17 +1,16 @@
 package com.mobile.Smf.fragments;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.FileProvider;
-import android.util.Log;
+import android.support.v4.content.ContextCompat;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,10 +26,14 @@ import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.User;
 import com.mobile.Smf.model.Feed; // todo remove
 
-import java.util.List;
+import static android.app.Activity.RESULT_OK;
 
 
 public class MakePicturePostFragment extends Fragment {
+
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
+    public static final int CAMERA_PERMISSION_GRANTED = 1;
+    private static final int SUCCESSFULLY_RETURNED_PICTURE = 1;
 
     private TextView textViewHeader;
     private ImageView imageViewPicture;
@@ -66,7 +69,8 @@ public class MakePicturePostFragment extends Fragment {
         buttonUploadNewPost.setText(R.string.makepicturepost_uploadbutton);
         buttonTakePicture.setText(R.string.makepicturepost_takepicturebutton);
 
-        imageViewPicture.setImageBitmap(getPreviewImageAsBitmap());
+        // set a placeholder image
+        imageViewPicture.setImageBitmap(getPlaceHolderImage());
 
         buttonUploadNewPost.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,8 +90,7 @@ public class MakePicturePostFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (checkIfPermissionToTakePhoto()) {
-                    imageToUploadAsBitmap = takePicture();
-                    updatePreviewImageView(imageToUploadAsBitmap);
+                    startCameraIntent();
                 }
             }
         });
@@ -95,39 +98,62 @@ public class MakePicturePostFragment extends Fragment {
         return makePicturePostView;
     }
 
-    private Bitmap takePicture() {
 
-        // super WIP
-        /*
-        Uri uri = FileProvider.getUriForFile(getActivity(), "com.bignerdranch.android.criminalintent.fileprovider", mPhotoFile);
+    private void startCameraIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
 
-        captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-
-        List<ResolveInfo> cameraActivities = getActivity().getPackageManager().queryIntentActivities(captureImage, PackageManager.MATCH_DEFAULT_ONLY);
-
-        for (ResolveInfo activity : cameraActivities) {
-            getActivity().grantUriPermission(activity.activityInfo.packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmapTinyPreview = (Bitmap) extras.get("data");
+            imageToUploadAsBitmap = imageBitmapTinyPreview;
+            updatePreviewImageView(imageToUploadAsBitmap);
         }
 
-        startActivityForResult(captureImage, REQUEST_PHOTO);
-        */
-
-
-        return null;
     }
 
     private boolean checkIfPermissionToTakePhoto(){
-        // todo implement
-        return true;
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),Manifest.permission.CAMERA)) {
+                Toast.makeText(getActivity(),"App needs permission to use camera to take picture.", Toast.LENGTH_LONG).show();
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_GRANTED);
+            }
+            return false;
+        } else {
+            // Permission has already been granted
+            return true;
+        }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_GRANTED: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                } else {
+                    // permission denied
+                }
+                return;
+            }
+        }
+    }
 
 
     private void updatePreviewImageView(Bitmap image){
         imageViewPicture.setImageBitmap(image);
     }
 
-    private Bitmap getPreviewImageAsBitmap(){
+    private Bitmap getPlaceHolderImage(){
 
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -141,6 +167,14 @@ public class MakePicturePostFragment extends Fragment {
         // todo proper implementation
         return feed.createImage(width,height/2, Color.BLACK);
     }
+
+
+
+
+
+
+
+
 
 
 }
