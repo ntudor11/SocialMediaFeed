@@ -16,11 +16,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
+                <action android:name="android.intent.action.VIEW"></action>
             </intent-filter>
         </activity>
         <activity android:name=".activities.LoginActivity"> <!-- todo make main and launcher -->
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN"></action>-->
+                <!--<action android:name="android.intent.action.VIEW"></action>-->
                 <!--<category android:name="android.intent.category.LAUNCHER"></category>-->
             <!--</intent-filter>-->
         </activity>
@@ -29,10 +31,23 @@
         <activity android:name=".activities.MakeTextPostActivity"></activity>
         <activity android:name=".activities.MakePicturePostActivity"></activity>
         <activity android:name=".activities.ProfileActivity"></activity>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.mobile.Smf.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/files"/>
+        </provider>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
+    <uses-permission android:name="android.permission.CAMERA"></uses-permission>
+
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.mobile.Smf.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mobile.Smf.R;
+import com.mobile.Smf.activities.LoginActivity;
 import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.User;
 
@@ -65,6 +67,8 @@ public class ProfileFragment extends Fragment {
             public void onClick(View view) {
                 if (dataInterface.logCurrentUserOut()){
                     Toast.makeText(getContext(),"You have been logged out",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getContext(), LoginActivity.class);
+                    startActivity(intent);
                 } else {
                     Toast.makeText(getContext(),"Could not log out...",Toast.LENGTH_SHORT).show();
                 }

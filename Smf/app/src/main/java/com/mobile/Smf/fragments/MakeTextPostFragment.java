@@ -49,13 +49,19 @@ public class MakeTextPostFragment extends Fragment {
             public void onClick(View view) {
                 String text = editTextInputText.getText().toString();
 
-                // upload the new post and respond accordingly
-                if (dataInterface.uploadTextPost(user.getUserName(),text)){
-                    // go back to feed after posting
-                    Intent intent = new Intent(getContext(), FeedActivity.class);
+                if (text.equals("")) {
+                    Toast.makeText(getContext(),"Type something to post!",Toast.LENGTH_SHORT).show();
                 } else {
-                    // else make a toast and let user try again?
-                    Toast.makeText(getContext(),"Could not upload post, try again.",Toast.LENGTH_SHORT).show();
+                    // upload the new post and respond accordingly
+                    if (dataInterface.uploadTextPost(user.getUserName(), text)) {
+                        // go back to feed after posting
+                        Toast.makeText(getContext(), "Uploaded post!", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(getContext(), FeedActivity.class);
+                        startActivity(intent);
+                    } else {
+                        // else make a toast and let user try again?
+                        Toast.makeText(getContext(), "Could not upload post, try again.", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
