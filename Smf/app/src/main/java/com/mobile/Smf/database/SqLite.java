@@ -1,17 +1,19 @@
 package com.mobile.Smf.database;
 
+import com.mobile.Smf.model.User;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.mobile.Smf.model.User;
-
 import java.sql.ResultSet;
+
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.icu.text.MessagePattern.ArgType.SELECT;
@@ -96,7 +98,10 @@ public class SqLite extends SQLiteOpenHelper {
             contentValues.put("birthYear", self.getBirthYear());
 
             long eval = mydatabase.insert("Profile_info", null, contentValues);
-            return true;
+                if(eval != -1)
+                    return true;
+                else
+                    return false;
         } else
             return false;
 
@@ -116,21 +121,29 @@ public class SqLite extends SQLiteOpenHelper {
 
     //Helper functions
 
-    private void dropAllTables(SQLiteDatabase db) {
-        List<String> tables = new ArrayList<String>();
-        Cursor cursor = db.rawQuery("SELECT * FROM sqlite_master WHERE type='table';", null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            String tableName = cursor.getString(1);
-            if (!tableName.equals("android_metadata") &&
-                    !tableName.equals("sqlite_sequence"))
-                tables.add(tableName);
-            cursor.moveToNext();
-        }
-        cursor.close();
+    private boolean dropAllTables() {
+        Cursor cursor = mydatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+        try {
+            List<String> tables = new ArrayList<>(cursor.getCount());
 
-        for(String tableName:tables) {
-            db.execSQL("DROP TABLE IF EXISTS " + tableName);
+            while (cursor.moveToNext()) {
+                tables.add(cursor.getString(0));
+            }
+
+            for (String table : tables) {
+                if (table.startsWith("sqlite_") || table.startsWith("android_metadata")) {
+                    continue;
+                }
+                mydatabase.execSQL("DROP TABLE IF EXISTS " + table);
+            }
+            Cursor deletetest = mydatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+            if(deletetest == null)
+                return true;
+            else
+                return false;
+
+        } finally {
+            cursor.close();
         }
     }
 

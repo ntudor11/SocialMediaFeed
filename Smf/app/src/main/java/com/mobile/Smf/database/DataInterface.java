@@ -31,7 +31,7 @@ public class DataInterface {
     * @return boolean true if valid login, false if invalid
     * */
     public boolean checkIfValidLogin(String userName, String password){
-        return true;
+        return mySql.checkIfValidLogin(userName, password);
     }
 
     /*
@@ -41,7 +41,7 @@ public class DataInterface {
     * @return boolean true if both unique, false otherwise
     * */
     public boolean checkIfValidNewUser(String userName, String email){
-        return true;
+        return mySql.checkIfValidNewUser(userName,email);
     }
 
     /*
@@ -54,17 +54,17 @@ public class DataInterface {
     * @return newly created user
     * */
     public User addNewUser(String userName, String password, String email, String country, int birthYear){
-        User newUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return newUser;
+        //User newUser = new User(1,"test user","test","test@test.test","test land",2019);
+        return mySql.addNewUser(userName,password,email,country,birthYear);
     }
 
     /*
     * get the currently logged in user
     * @return User currently logged in user
     * */
-    public User getLoggedInUser(){
-        User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return currentUser;
+    public User getLoggedInUser(String userName, String password){
+        //User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
+        return mySql.getLoggedInUser(userName,password);
     }
 
     /*
@@ -102,7 +102,7 @@ public class DataInterface {
     * @param text String the text of the post
     * @return boolean true if successful upload, false if upload fails
     * */
-    public boolean uploadTextPost(String username, String text){
+    public boolean uploadTextPost(String username, String text, long timestamp){
         return true;
     }
 
@@ -121,6 +121,6 @@ public class DataInterface {
     * @return boolean true if succesfully deleted all local user data, false otherwise
     * */
     public boolean logCurrentUserOut(){
-        return true;
+        return sqLite.dropAllTables();
     }
 }

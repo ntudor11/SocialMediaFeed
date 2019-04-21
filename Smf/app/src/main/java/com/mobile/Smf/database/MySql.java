@@ -3,22 +3,16 @@ package com.mobile.Smf.database;
 
 import com.mobile.Smf.model.User;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//probably has to implement observes for sync
+
 public class MySql {
     //DB instance
     private static MySql singleton = null;
@@ -32,7 +26,7 @@ public class MySql {
     private static ExecutorService service;
     private AtomicInteger oldestBound = new AtomicInteger();
     private AtomicInteger newestBound = new AtomicInteger();
-    //private static AtomicBoolean DBcheck = new AtomicBoolean(false);
+
 
 
     private MySql() {
@@ -165,7 +159,16 @@ public class MySql {
         }
         return newUser;
     }
+/*  //Will be done as callable thread
+    public boolean uploadTextPost(String username, String text, long timestamp) {
 
+        try{
+            Future<Boolean> f = service.submit(new InsertMySql(DB_URL, user, pass,String.format(Locale.getDefault(),
+                    "INSERT INTO Post (userID, timePosted) VALUES (, %d);"
+                    ,username, text)));
+        }
+    }
+*/
 }
 
 
