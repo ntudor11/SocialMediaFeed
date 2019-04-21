@@ -1,22 +1,18 @@
 package com.mobile.Smf.database;
 
-import com.mobile.Smf.model.User;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import java.sql.ResultSet;
+
+import com.mobile.Smf.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 import static android.content.Context.MODE_PRIVATE;
-import static android.icu.text.MessagePattern.ArgType.SELECT;
 
 public class SqLite extends SQLiteOpenHelper {
 
@@ -118,10 +114,21 @@ public class SqLite extends SQLiteOpenHelper {
         return res;
     }
 
+    public String getUserName() {
+        Cursor res = null;
+        String userName = null;
+        try {
+            res = mydatabase.rawQuery("SELECT name FROM Profile_info ;", null);
+            userName = res.getString(0);
+
+        } catch (SQLException e) {e.printStackTrace();}
+        return userName;
+    }
+
 
     //Helper functions
 
-    private boolean dropAllTables() {
+    public boolean dropAllTables() {
         Cursor cursor = mydatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
         try {
             List<String> tables = new ArrayList<>(cursor.getCount());

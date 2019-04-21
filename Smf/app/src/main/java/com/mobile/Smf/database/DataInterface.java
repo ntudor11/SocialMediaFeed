@@ -5,10 +5,11 @@
 package com.mobile.Smf.database;
 
 
-import com.mobile.Smf.model.Post;
-import com.mobile.Smf.model.User;
 import android.content.Context;
 import android.graphics.Bitmap;
+
+import com.mobile.Smf.model.Post;
+import com.mobile.Smf.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,9 +63,9 @@ public class DataInterface {
     * get the currently logged in user
     * @return User currently logged in user
     * */
-    public User getLoggedInUser(String userName, String password){
+    public User getLoggedInUser(){
         //User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return mySql.getLoggedInUser(userName,password);
+        return mySql.getLoggedInUser(sqLite.getUserName());
     }
 
     /*

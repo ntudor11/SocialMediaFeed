@@ -137,8 +137,8 @@ public class MySql {
     }
 
 
-    public User getLoggedInUser(String userName, String password) {
-        ResultSet rs = null;
+    public User getLoggedInUser(String userName) {
+        ResultSet rs;
         User newUser = null;
         try {
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, String.format(Locale.getDefault(),

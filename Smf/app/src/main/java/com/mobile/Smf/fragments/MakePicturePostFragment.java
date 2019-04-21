@@ -57,6 +57,8 @@ public class MakePicturePostFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View makePicturePostView = inflater.inflate(R.layout.fragment_makepicturepost, container, false);
 
+        //SqLite.syncProfileInfoFromMySql has not been called during login, and should be
+        //then the date for getLoggedInUser can be uptained from SqLite
         dataInterface = new DataInterface(getContext());
         user = dataInterface.getLoggedInUser();
 
