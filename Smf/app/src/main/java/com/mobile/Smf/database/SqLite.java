@@ -126,7 +126,6 @@ public class SqLite extends SQLiteOpenHelper {
     }
 
 
-    //Helper functions
 
     public boolean dropAllTables() {
         Cursor cursor = mydatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);

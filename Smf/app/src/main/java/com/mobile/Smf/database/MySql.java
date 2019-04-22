@@ -159,16 +159,23 @@ public class MySql {
         }
         return newUser;
     }
-/*  //Will be done as callable thread
+  //Will be done as callable thread
     public boolean uploadTextPost(String username, String text, long timestamp) {
-
+        boolean successfulTransaction = false;
         try{
-            Future<Boolean> f = service.submit(new InsertMySql(DB_URL, user, pass,String.format(Locale.getDefault(),
-                    "INSERT INTO Post (userID, timePosted) VALUES (, %d);"
-                    ,username, text)));
-        }
+            String arg1 = ""; //queries
+
+            Future<Boolean> f = service.submit(new TransactionInsertMySql(DB_URL, user, pass,arg1));
+
+            successfulTransaction = f.get();
+
+        } catch(RuntimeException e) {System.out.println(e.getMessage()); e.printStackTrace();}
+          catch(ExecutionException ex) {ex.printStackTrace();}
+          catch(InterruptedException ex) {ex.printStackTrace();}
+
+        return successfulTransaction;
     }
-*/
+
 }
 
 
