@@ -2,9 +2,9 @@
     <string name="app_name">Smf</string>
 
     <!--dev stuff-->
-    <string name="title_feed">Feed</string>
-    <string name="title_makepost">Post</string>
-    <string name="title_account">Account</string>
+    <string name="title_feed">FEED</string>
+    <string name="title_makepost">POST</string>
+    <string name="title_account">ACCOUNT</string>
 
 
     <!--login fragment-->
@@ -51,5 +51,10 @@
     <string name="profile_country_desc">Country: </string>
     <string name="profile_birthyear_desc">Birthyear: </string>
     <string name="profile_button_logout">Log out</string>
+
+    <!--feed fragment-->
+    <string name="not_liked">Not Liked Yet</string>
+    <string name="liked">Liked</string>
+    <string name="likes_no">12</string>
 
 </resources>
