@@ -4,11 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_gravity="center"
+    android:layout_gravity="center_vertical"
     android:background="@drawable/bg"
     android:paddingTop="20dp"
-    android:fontFamily="@font/nexab"
     >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/logo"
+        android:src="@drawable/smf_logo"
+        android:paddingBottom="60dp"
+        android:paddingTop="140dp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -53,19 +60,40 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_gravity="center"
         >
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/signup_bg"
+            android:textColor="#ffffff"
             android:id="@+id/login_button_login"
+            android:fontFamily="@font/nexal"
             />
-        <Button
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/login_button_signup"
-            />
+            android:layout_marginTop="140dp"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nexab"
+                android:text="@string/before_signup_text"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/login_button_signup"
+                android:fontFamily="@font/nexab"
+                android:background="@android:color/transparent"
+
+                />
+        </LinearLayout>
     </LinearLayout>
 
 
