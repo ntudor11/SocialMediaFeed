@@ -53,7 +53,7 @@ public class MakeTextPostFragment extends Fragment {
                     Toast.makeText(getContext(),"Type something to post!",Toast.LENGTH_SHORT).show();
                 } else {
                     // upload the new post and respond accordingly
-                    if (dataInterface.uploadTextPost(user.getUserName(), text)) {
+                    if (dataInterface.uploadTextPost(user.getUserName(), text, 0)) {
                         // go back to feed after posting
                         Toast.makeText(getContext(), "Uploaded post!", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getContext(), FeedActivity.class);
