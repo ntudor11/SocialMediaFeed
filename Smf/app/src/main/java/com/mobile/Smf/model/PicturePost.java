@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class PicturePost extends Post implements PostTypeInterface {
 
-    private static final int postType = 2;
+    private static final int postType = 1; // was 2
     @Override
     public int getPostType(){return postType;}
 

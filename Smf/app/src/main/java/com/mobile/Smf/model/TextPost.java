@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class TextPost extends Post {
 
-    private static final int postType = 1;
+    private static final int postType = 0; // was 1
     @Override
     public int getPostType(){return postType;}
 

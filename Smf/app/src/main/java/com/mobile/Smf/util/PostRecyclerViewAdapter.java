@@ -24,8 +24,8 @@ import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.GenericViewHolder> {
 
-    private static final int TYPE_TEXT_POST = 1;
-    private static final int TYPE_PICTURE_POST = 2;
+    private static final int TYPE_TEXT_POST = 0;
+    private static final int TYPE_PICTURE_POST = 1;
 
     private List<Post> posts;
 
