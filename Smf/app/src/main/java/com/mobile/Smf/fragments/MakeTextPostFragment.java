@@ -23,7 +23,6 @@ public class MakeTextPostFragment extends Fragment {
     private Button buttonUploadNewPost;
 
     private DataInterface dataInterface;
-    private User user;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -35,7 +34,6 @@ public class MakeTextPostFragment extends Fragment {
         View makePostView = inflater.inflate(R.layout.fragment_maketextpost,container,false);
 
         dataInterface = new DataInterface(getContext());
-        user = dataInterface.getLoggedInUser();
 
         textViewHeader = makePostView.findViewById(R.id.maketextpost_textview_header);
         editTextInputText = makePostView.findViewById(R.id.maketextpost_edittext_text);
@@ -53,7 +51,7 @@ public class MakeTextPostFragment extends Fragment {
                     Toast.makeText(getContext(),"Type something to post!",Toast.LENGTH_SHORT).show();
                 } else {
                     // upload the new post and respond accordingly
-                    if (dataInterface.uploadTextPost(user.getUserName(), text)) {
+                    if (dataInterface.uploadTextPost(text)) {
                         // go back to feed after posting
                         Toast.makeText(getContext(), "Uploaded post!", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getContext(), FeedActivity.class);

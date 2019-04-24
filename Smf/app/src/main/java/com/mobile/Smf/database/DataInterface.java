@@ -64,8 +64,9 @@ public class DataInterface {
     * @return User currently logged in user
     * */
     public User getLoggedInUser(){
-        //User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return mySql.getLoggedInUser(sqLite.getUserName());
+        User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
+        return currentUser;
+        //return mySql.getLoggedInUser(sqLite.getUserName());
     }
 
     /*
@@ -103,7 +104,7 @@ public class DataInterface {
     * @param text String the text of the post
     * @return boolean true if successful upload, false if upload fails
     * */
-    public boolean uploadTextPost(String username, String text, long timestamp){
+    public boolean uploadTextPost(String text){
         return true;
     }
 
@@ -113,7 +114,7 @@ public class DataInterface {
      * @param picture the picture of the post as a Bitmap
      * @return boolean true if successful upload, false if upload fails
      * */
-    public boolean uploadPicturePost(String username, Bitmap picture){
+    public boolean uploadPicturePost(Bitmap picture){
         return true;
     }
 

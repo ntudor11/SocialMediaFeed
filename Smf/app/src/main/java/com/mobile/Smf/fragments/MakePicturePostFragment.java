@@ -1,16 +1,24 @@
 package com.mobile.Smf.fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Point;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +33,12 @@ import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.User;
 import com.mobile.Smf.model.Feed; // todo remove
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -41,9 +55,9 @@ public class MakePicturePostFragment extends Fragment {
     private Button buttonTakePicture;
 
     private DataInterface dataInterface;
-    private User user;
 
     private Bitmap imageToUploadAsBitmap;
+    private String pictureToUploadFilePath;
 
     // purely for dev needs, todo remove
     private Feed feed;
@@ -60,7 +74,6 @@ public class MakePicturePostFragment extends Fragment {
         //SqLite.syncProfileInfoFromMySql has not been called during login, and should be
         //then the date for getLoggedInUser can be uptained from SqLite
         dataInterface = new DataInterface(getContext());
-        user = dataInterface.getLoggedInUser();
 
         textViewHeader = (TextView) makePicturePostView.findViewById(R.id.makepicturepost_textview_header);
         imageViewPicture = (ImageView) makePicturePostView.findViewById(R.id.makepicturepost_imageview_picure);
@@ -72,12 +85,14 @@ public class MakePicturePostFragment extends Fragment {
         buttonTakePicture.setText(R.string.makepicturepost_takepicturebutton);
 
         // set a placeholder image
-        imageViewPicture.setImageBitmap(getPlaceHolderImage());
+        imageViewPicture.setImageBitmap(getPlaceHolderImage()); // todo add nicer placeholder
+
+
 
         buttonUploadNewPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (dataInterface.uploadPicturePost(user.getUserName(), imageToUploadAsBitmap)){
+                if (dataInterface.uploadPicturePost(imageToUploadAsBitmap)){
                     Toast.makeText(getContext(),"Successfully posted image",Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getContext(), FeedActivity.class);
                     startActivity(intent);
@@ -100,23 +115,60 @@ public class MakePicturePostFragment extends Fragment {
         return makePicturePostView;
     }
 
-
     private void startCameraIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            // create a temp file to store new image in
+            File pictureFile = null;
+            try {
+                pictureFile = createImageFile();
+            }
+            catch (IOException e){
+                Log.d("MakePicturePosTFragment","Could not create pictureFile");
+            }
+            if (pictureFile != null){
+                Uri pictureURI = FileProvider.getUriForFile(getContext(),"com.mobile.Smf.fileprovider",pictureFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmapTinyPreview = (Bitmap) extras.get("data");
-            imageToUploadAsBitmap = imageBitmapTinyPreview;
-            updatePreviewImageView(imageToUploadAsBitmap);
+            imageToUploadAsBitmap = rotateBitmap(createBitmapFromFile(pictureToUploadFilePath), 90);
+            Log.d("MPP","Bitmap size: "+imageToUploadAsBitmap.getAllocationByteCount());
+            Log.d("MPP","Heigh: "+imageToUploadAsBitmap.getHeight()+" Width: "+imageToUploadAsBitmap.getHeight());
+            imageViewPicture.setImageBitmap(imageToUploadAsBitmap);
+        } else if (requestCode == Activity.RESULT_CANCELED){
+            // user cancelled
         }
+    }
 
+    private Bitmap createBitmapFromFile(String filePath){
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inSampleSize = 1;
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+        return bitmap;
+    }
+
+    private Bitmap rotateBitmap(Bitmap bitmapToBeRotatated, float angle){
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmapToBeRotatated, 0,0,
+                bitmapToBeRotatated.getWidth(), bitmapToBeRotatated.getHeight(),
+                matrix, true);
+        return rotatedBitmap;
+    }
+
+    private File createImageFile() throws IOException{
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String pictureFileName = "IMG_"+timeStamp+"_";
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File picture = File.createTempFile(pictureFileName,".jpg",storageDir);
+        pictureToUploadFilePath = picture.getAbsolutePath();
+        return picture;
     }
 
     private boolean checkIfPermissionToTakePhoto(){
