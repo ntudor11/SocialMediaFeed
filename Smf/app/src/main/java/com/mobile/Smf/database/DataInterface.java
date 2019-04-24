@@ -64,8 +64,9 @@ public class DataInterface {
     * @return User currently logged in user
     * */
     public User getLoggedInUser(){
-        //User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return mySql.getLoggedInUser(sqLite.getUserName());
+        User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
+        return currentUser;
+        //return mySql.getLoggedInUser(sqLite.getUserName());
     }
 
     /*

@@ -20,7 +20,7 @@ public abstract class Post implements PostTypeInterface {
     }
 
     public String getTimeStampAsStr(){
-        return new SimpleDateFormat("hh:mm dd/MM yyyy").format(timeStamp);
+        return new SimpleDateFormat("hh:mm dd/MM/yyyy").format(timeStamp);
     }
 
     public int getPostID() {

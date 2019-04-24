@@ -54,7 +54,7 @@
          >
 
         <ImageView
-            android:id="@+id/liked_not_yet"
+            android:id="@+id/view_post_imageview_like_not"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:contentDescription="@string/not_liked"
@@ -65,10 +65,11 @@
             android:focusable="true" />
 
         <TextView
+            android:id="@+id/view_post_textview_numlikes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/likes_no"
-            android:layout_toRightOf="@id/liked_not_yet"
+            android:layout_toRightOf="@id/view_post_imageview_like_not"
             android:layout_centerVertical="true" />
 
     </RelativeLayout>
