@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <!--make white or other colour-->
-    <solid android:color="#1c9403" />
+    <solid android:color="#FFFFFF" />
     <!--border color and border width-->
     <stroke
         android:width="7dp"
-        android:color="#d92500" />
+        android:color="#000000" />
     <!--border radius in dp-->
-    <corners android:radius="80dp" />
+    <corners android:radius="180dp" />
 </shape>

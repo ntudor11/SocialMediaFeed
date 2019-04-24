@@ -13,6 +13,8 @@ import com.mobile.Smf.model.PicturePost;
 import com.mobile.Smf.model.Post;
 import com.mobile.Smf.model.TextPost;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 /*
@@ -82,12 +84,18 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView textViewUsername;
         private TextView textViewTimestamp;
         private TextView textViewText;
+        private ImageView like;
+        private boolean isLiked;
+        private TextView numberOfLikes;
 
         public TextPostViewHolder(View itemView){
             super(itemView);
             textViewUsername = (TextView) itemView.findViewById(R.id.view_textpost_textview_username);
             textViewTimestamp = (TextView) itemView.findViewById(R.id.view_textpost_textview_timestamp);
             textViewText = (TextView) itemView.findViewById(R.id.view_textpost_textview_text);
+            like = (ImageView) itemView.findViewById(R.id.view_post_imageview_like_not);
+            numberOfLikes = (TextView) itemView.findViewById(R.id.view_post_textview_numlikes);
+            isLiked = false;
         }
 
         @Override
@@ -95,6 +103,20 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewUsername.setText(tPost.getUserName());
             textViewTimestamp.setText(tPost.getTimeStampAsStr());
             textViewText.setText(tPost.getText());
+
+            like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    isLiked = !isLiked;
+
+                    if (isLiked == true) {
+                        like.setImageResource(R.drawable.liked);
+                        // TODO implement database count and increment no in view
+                    } else {
+                        like.setImageResource(R.drawable.liked_not);
+                    }
+                }
+            });
         }
     }
 
@@ -103,12 +125,18 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView textViewUsername;
         private TextView textViewTimestamp;
         private ImageView imageViewPicture;
+        private ImageView like;
+        private boolean isLiked;
+        private TextView numberOfLikes;
 
         public PicturePostHolder(View itemView){
             super(itemView);
             textViewUsername = (TextView) itemView.findViewById(R.id.view_picturepost_textview_username);
             textViewTimestamp = (TextView) itemView.findViewById(R.id.view_picturepost_textview_timestamp);
             imageViewPicture = (ImageView) itemView.findViewById(R.id.view_picturepost_imageview_picture);
+            like = (ImageView) itemView.findViewById(R.id.view_post_imageview_like_not);
+            numberOfLikes = (TextView) itemView.findViewById(R.id.view_post_textview_numlikes);
+            isLiked = false;
         }
 
         @Override
@@ -116,6 +144,20 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewUsername.setText(pPost.getUserName());
             textViewTimestamp.setText(pPost.getTimeStampAsStr());
             imageViewPicture.setImageBitmap(pPost.getPicture());
+
+            like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    isLiked = !isLiked;
+
+                    if (isLiked) {
+                        like.setImageResource(R.drawable.liked);
+                        // TODO implement database count and increment no in view
+                    } else {
+                        like.setImageResource(R.drawable.liked_not);
+                    }
+                }
+            });
         }
     }
 
