@@ -98,7 +98,7 @@ public class MakePicturePostFragment extends Fragment {
                     startActivity(intent);
 
                 } else {
-                    Toast.makeText(getContext(),"Failed to post picture.",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(),"Failed to post icon_photos.",Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -175,7 +175,7 @@ public class MakePicturePostFragment extends Fragment {
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),Manifest.permission.CAMERA)) {
-                Toast.makeText(getActivity(),"App needs permission to use camera to take picture.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(),"App needs permission to use camera to take icon_photos.", Toast.LENGTH_LONG).show();
             } else {
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_GRANTED);

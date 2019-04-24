@@ -111,7 +111,7 @@ public class DataInterface {
     /*
      * uploads a new PicturePost to MySql server.
      * @param username String the user who posted the text
-     * @param picture the picture of the post as a Bitmap
+     * @param icon_photos the icon_photos of the post as a Bitmap
      * @return boolean true if successful upload, false if upload fails
      * */
     public boolean uploadPicturePost(Bitmap picture){

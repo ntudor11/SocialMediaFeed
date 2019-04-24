@@ -4,7 +4,7 @@
     <!--dev stuff-->
     <string name="title_feed">FEED</string>
     <string name="title_makepost">POST</string>
-    <string name="title_account">ACCOUNT</string>
+    <string name="title_account">PROFILE</string>
 
 
     <!--login fragment-->
