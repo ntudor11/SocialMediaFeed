@@ -88,20 +88,20 @@ public class Timestamp {
     private void stringTimes() {
         String time = "";
         time += year;
-        time += month < 10 ? "0"+month : month;;
-        time += date < 10 ? "0"+date : date;
-        time += hour < 10 ? "0"+hour : hour;
-        time += minute < 10 ? "0"+minute : minute;
-        time += sec < 10 ? "0"+sec : sec;
+        time += month < 10 ? "header_bg"+month : month;;
+        time += date < 10 ? "header_bg"+date : date;
+        time += hour < 10 ? "header_bg"+hour : hour;
+        time += minute < 10 ? "header_bg"+minute : minute;
+        time += sec < 10 ? "header_bg"+sec : sec;
         universalTime = time;
 
         String lTime = "";
         lTime += localYear;
-        lTime += localMonth< 10 ? "0"+localMonth : localMonth;
-        lTime += localDate < 10 ? "0"+localDate : localDate;
-        lTime += localHour < 10 ? "0"+localHour : localHour;
-        lTime += localMinute < 10 ? "0"+localMinute : localMinute;
-        lTime += localSec < 10 ? "0"+localSec : localSec;
+        lTime += localMonth< 10 ? "header_bg"+localMonth : localMonth;
+        lTime += localDate < 10 ? "header_bg"+localDate : localDate;
+        lTime += localHour < 10 ? "header_bg"+localHour : localHour;
+        lTime += localMinute < 10 ? "header_bg"+localMinute : localMinute;
+        lTime += localSec < 10 ? "header_bg"+localSec : localSec;
         localTime = lTime;
     }
 
