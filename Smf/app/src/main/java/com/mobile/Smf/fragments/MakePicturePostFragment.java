@@ -218,7 +218,7 @@ public class MakePicturePostFragment extends Fragment {
         // Log.e("derp",""+height); //1794
 
 
-        // todo proper implementation
+        // todo proper implementation - appropriate file: drawable/image_placeholder
         return feed.createImage(width,height/2, Color.BLACK);
     }
 

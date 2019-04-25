@@ -37,11 +37,11 @@
     <string name="before_login_text">Already have an account?</string>
 
     <!--maketextpost fragment-->
-    <string name="maketextpost_header">Make a new text post:</string>
+    <string name="maketextpost_header">NEW TEXT POST</string>
     <string name="maketextpost_uploadbutton">Post!</string>
 
     <!--makepicturepost fragment-->
-    <string name="makepicturepost_header">Make a new picture post:</string>
+    <string name="makepicturepost_header">NEW PICTURE POST</string>
     <string name="makepicturepost_uploadbutton">Post!</string>
     <string name="makepicturepost_takepicturebutton">Take a picture</string>
 
