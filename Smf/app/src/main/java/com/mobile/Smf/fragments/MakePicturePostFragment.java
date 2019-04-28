@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Point;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,7 +17,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +28,8 @@ import android.widget.Toast;
 import com.mobile.Smf.R;
 import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.database.DataInterface;
-import com.mobile.Smf.model.User;
 import com.mobile.Smf.model.Feed; // todo remove
+import com.mobile.Smf.util.PostContentHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +50,9 @@ public class MakePicturePostFragment extends Fragment {
     private ImageView imageViewPicture;
     private Button buttonUploadNewPost;
     private Button buttonTakePicture;
+    private Button rotatePicturePreviewButton;
 
+    private PostContentHolder postContentHolder;
     private DataInterface dataInterface;
 
     private Bitmap imageToUploadAsBitmap;
@@ -74,20 +73,27 @@ public class MakePicturePostFragment extends Fragment {
         //SqLite.syncProfileInfoFromMySql has not been called during login, and should be
         //then the date for getLoggedInUser can be uptained from SqLite
         dataInterface = new DataInterface(getContext());
+        postContentHolder = PostContentHolder.getPostContentHolderSingleton();
 
         textViewHeader = (TextView) makePicturePostView.findViewById(R.id.makepicturepost_textview_header);
         imageViewPicture = (ImageView) makePicturePostView.findViewById(R.id.makepicturepost_imageview_picure);
         buttonUploadNewPost = (Button) makePicturePostView.findViewById(R.id.makepicturepost_button_uploadnewpostbutton);
         buttonTakePicture = (Button) makePicturePostView.findViewById(R.id.makepicturepost_button_takenewpicture);
+        rotatePicturePreviewButton = (Button) makePicturePostView.findViewById(R.id.makepicturepost_button_rotatepicture);
 
         textViewHeader.setText(R.string.makepicturepost_header);
         buttonUploadNewPost.setText(R.string.makepicturepost_uploadbutton);
         buttonTakePicture.setText(R.string.makepicturepost_takepicturebutton);
+        rotatePicturePreviewButton.setText(R.string.makepicturepost_rotatepicturebutton);
 
-        // set a placeholder image
-        imageViewPicture.setImageBitmap(getPlaceHolderImage()); // todo add nicer placeholder
-
-
+        // get pictyure to display
+        if (postContentHolder.getPicture() == null){
+            // set a placeholder image
+            updatePreviewImageView(getPlaceHolderImage()); // todo add nicer placeholder
+        } else {
+            imageToUploadAsBitmap = postContentHolder.getPicture();
+            updatePreviewImageView(imageToUploadAsBitmap);
+        }
 
         buttonUploadNewPost.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +114,17 @@ public class MakePicturePostFragment extends Fragment {
             public void onClick(View v) {
                 if (checkIfPermissionToTakePhoto()) {
                     startCameraIntent();
+                }
+            }
+        });
+
+        rotatePicturePreviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (imageToUploadAsBitmap != null){
+                    imageToUploadAsBitmap = rotateBitmap(imageToUploadAsBitmap,90);
+                    postContentHolder.setPicture(imageToUploadAsBitmap);
+                    updatePreviewImageView(imageToUploadAsBitmap);
                 }
             }
         });
@@ -137,10 +154,11 @@ public class MakePicturePostFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            imageToUploadAsBitmap = rotateBitmap(createBitmapFromFile(pictureToUploadFilePath), 90);
+            imageToUploadAsBitmap = createBitmapFromFile(pictureToUploadFilePath);
+            postContentHolder.setPicture(imageToUploadAsBitmap);
             Log.d("MPP","Bitmap size: "+imageToUploadAsBitmap.getAllocationByteCount());
             Log.d("MPP","Heigh: "+imageToUploadAsBitmap.getHeight()+" Width: "+imageToUploadAsBitmap.getHeight());
-            imageViewPicture.setImageBitmap(imageToUploadAsBitmap);
+            updatePreviewImageView(imageToUploadAsBitmap);
         } else if (requestCode == Activity.RESULT_CANCELED){
             // user cancelled
         }
@@ -209,13 +227,15 @@ public class MakePicturePostFragment extends Fragment {
 
     private Bitmap getPlaceHolderImage(){
 
-        Display display = getActivity().getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        int height = size.y;
+//        Display display = getActivity().getWindowManager().getDefaultDisplay();
+//        Point size = new Point();
+//        display.getSize(size);
+//        int width = size.x;
+//        int height = size.y;
         // Log.e("derp",""+width); //1080
         // Log.e("derp",""+height); //1794
+        int width = 960;
+        int height = 960;
 
 
         // todo proper implementation - appropriate file: drawable/image_placeholder

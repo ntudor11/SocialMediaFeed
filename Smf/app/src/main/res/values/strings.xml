@@ -44,6 +44,7 @@
     <string name="makepicturepost_header">NEW PICTURE POST</string>
     <string name="makepicturepost_uploadbutton">Post!</string>
     <string name="makepicturepost_takepicturebutton">Take a picture</string>
+    <string name="makepicturepost_rotatepicturebutton">Rotate picture</string>
 
     <!--profile fragment-->
     <string name="profile_username_desc">Username: </string>

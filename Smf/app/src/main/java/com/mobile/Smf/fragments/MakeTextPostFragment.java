@@ -15,8 +15,11 @@ import com.mobile.Smf.R;
 import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.User;
+import com.mobile.Smf.util.PostContentHolder;
 
 public class MakeTextPostFragment extends Fragment {
+
+    private PostContentHolder postContentHolder;
 
     private TextView textViewHeader;
     private EditText editTextInputText;
@@ -33,11 +36,18 @@ public class MakeTextPostFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View makePostView = inflater.inflate(R.layout.fragment_maketextpost,container,false);
 
+        postContentHolder = PostContentHolder.getPostContentHolderSingleton();
         dataInterface = new DataInterface(getContext());
 
         textViewHeader = makePostView.findViewById(R.id.maketextpost_textview_header);
         editTextInputText = makePostView.findViewById(R.id.maketextpost_edittext_text);
         buttonUploadNewPost = makePostView.findViewById(R.id.maketextpost_button_uploadnewpostbutton);
+
+        if (postContentHolder.getText().equals("")){
+            editTextInputText.setText("");
+        } else {
+            editTextInputText.setText(postContentHolder.getText());
+        }
 
         textViewHeader.setText(R.string.maketextpost_header);
         buttonUploadNewPost.setText(R.string.maketextpost_uploadbutton);
@@ -46,6 +56,7 @@ public class MakeTextPostFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 String text = editTextInputText.getText().toString();
+                postContentHolder.setText(text);
 
                 if (text.equals("")) {
                     Toast.makeText(getContext(),"Type something to post!",Toast.LENGTH_SHORT).show();
