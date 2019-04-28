@@ -2,6 +2,7 @@ package com.mobile.Smf.util;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +62,11 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     @Override
     public void onBindViewHolder(GenericViewHolder holder, int position){
+
+        //todo add call here to methods that add new posts
+        Log.d("PRVA","bind holder at position: "+(position)+" of "+(getItemCount() - 1));
+        checkIfNeedToGetMorePosts(position,getItemCount());
+
         Post post = posts.get(position);
         holder.bind(post);
     }
@@ -68,6 +74,18 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     @Override
     public int getItemCount(){
         return posts.size();
+    }
+
+    private void checkIfNeedToGetMorePosts(int position, int total){
+        int post_threshold = 3;
+
+        if (position <= post_threshold) {
+            //get newer posts in the top
+            Log.d("PRVA", "should fetch top posts"); // todo add method calls
+        } else if (position >= (total - post_threshold)) {
+            // get older posts
+            Log.d("PRVA","should fetch more bottom posts");
+        }
     }
 
     //      >>> VIEW HOLDERS <<<
@@ -100,6 +118,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
         @Override
         public void bind(TextPost tPost){
+            //if the post is broken we do not show it
+            if (tPost == null){
+                return;
+            }
             textViewUsername.setText(tPost.getUserName());
             textViewTimestamp.setText(tPost.getTimeStampAsStr());
             textViewText.setText(tPost.getText());
@@ -141,6 +163,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
         @Override
         public void bind(PicturePost pPost){
+            //if the post is broken we do not show it
+            if (pPost.getPicture() == null){
+                return;
+            }
             textViewUsername.setText(pPost.getUserName());
             textViewTimestamp.setText(pPost.getTimeStampAsStr());
             imageViewPicture.setImageBitmap(pPost.getPicture());

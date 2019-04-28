@@ -20,13 +20,21 @@
         android:textSize="40sp"
         android:background="@drawable/border_shadow"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/maketextpost_textview_numchars"
+        android:layout_gravity="center"
+        android:layout_marginTop="75dp"
+        />
+
     <EditText
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="75dp"
         android:id="@+id/maketextpost_edittext_text"
         android:fontFamily="@font/nexal"
+        android:maxLength="145"
         />
 
     <Button
