@@ -17,10 +17,12 @@ import com.mobile.Smf.model.Feed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import static com.mobile.Smf.model.Feed.getFeedSingleton;
 
-public class FeedFragment extends Fragment {
+public class FeedFragment extends Fragment implements Observer {
 
     private boolean debug = true;
 
@@ -54,7 +56,7 @@ public class FeedFragment extends Fragment {
     }
 
     private void startRecyclerView() {
-        postRecyclerViewAdapter = new PostRecyclerViewAdapter(feed.getFeedAsList(),getContext(), this);
+        postRecyclerViewAdapter = new PostRecyclerViewAdapter(feed.getFeedAsList());
         feedRecyclerView.setAdapter(postRecyclerViewAdapter);
 
         feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -112,10 +114,9 @@ public class FeedFragment extends Fragment {
 //        postRecyclerViewAdapter.updatePosts(feed.getFeedAsList());
     }
 
-    public void updateRecyclerView() {
-        //postRecyclerViewAdapter.notifyDataSetChanged();
-        //startRecyclerView();
-        // todo implement proper updating...
+    @Override
+    public void update(Observable o, Object arg) {
+        postRecyclerViewAdapter.notifyDataSetChanged();
     }
 
 }

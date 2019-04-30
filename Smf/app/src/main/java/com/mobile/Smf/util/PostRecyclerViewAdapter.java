@@ -28,18 +28,12 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private static final int TYPE_TEXT_POST = 0;
     private static final int TYPE_PICTURE_POST = 1;
 
-    private Feed feed;
-
     private boolean hasGottenNewPosts = true;
 
     private List<Post> posts;
 
-    private FeedFragment feedFragment;
-
-    public PostRecyclerViewAdapter(List<Post> newPosts, Context context, FeedFragment feedFragmentParam){
+    public PostRecyclerViewAdapter(List<Post> newPosts){
         posts = newPosts;
-        feed = Feed.getFeedSingleton(context);
-        feedFragment = feedFragmentParam;
     }
 
     public void updatePosts(List<Post> newPosts){

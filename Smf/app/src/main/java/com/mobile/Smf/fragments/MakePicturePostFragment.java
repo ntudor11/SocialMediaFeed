@@ -58,7 +58,6 @@ public class MakePicturePostFragment extends Fragment {
     private Bitmap imageToUploadAsBitmap;
     private String pictureToUploadFilePath;
 
-    // purely for dev needs, todo remove
     private Feed feed;
 
     @Override
@@ -75,7 +74,7 @@ public class MakePicturePostFragment extends Fragment {
 
         postContentHolder = PostContentHolder.getPostContentHolderSingleton();
         dataInterface = DataInterface.getDataInterface(getContext());
-
+        feed = Feed.getFeedSingleton(getContext());
 
         textViewHeader = (TextView) makePicturePostView.findViewById(R.id.makepicturepost_textview_header);
         imageViewPicture = (ImageView) makePicturePostView.findViewById(R.id.makepicturepost_imageview_picure);
@@ -107,6 +106,7 @@ public class MakePicturePostFragment extends Fragment {
                 if (dataInterface.uploadPicturePost(imageToUploadAsBitmap)){
                     postContentHolder.clearData();
                     Toast.makeText(getContext(),"Successfully posted image",Toast.LENGTH_LONG).show();
+                    feed.updateWithNewerPosts();
                     Intent intent = new Intent(getContext(), FeedActivity.class);
                     startActivity(intent);
                 } else {
