@@ -22,7 +22,6 @@ public class UpdateMySql implements Callable<Boolean> {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(DB_URL, user, pass);
-            System.out.println("Database connection success UpdateMySql");
 
             Statement st = con.createStatement();
 

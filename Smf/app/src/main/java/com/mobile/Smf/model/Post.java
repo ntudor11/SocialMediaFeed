@@ -37,18 +37,14 @@ public abstract class Post implements PostTypeInterface {
         this.userName = userName;
     }
 
-   public long getTimeStamp() {
+    public long getTimeStamp() {
        return timeStamp;
    }
 
-    public String getLocalTimeStamp() {
-        return localTimeStamp;
-    }
+    public String getLocalTimeStamp() { return localTimeStamp; }
 
     public String getUniversalTimeStamp() {
         return universalTimeStamp;
     }
-
-   //public void setTimeStamp(Date timeStamp) { this.timeStamp = timeStamp; }
 
 }

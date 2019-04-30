@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.mobile.Smf.model.Post;
@@ -187,32 +188,34 @@ public class DataInterface {
     * */
     public List<Post> getUpdatedListOlder() {
 
+        if(olderPosts.size() == 0)
+            return null;
+
         oldP.lock();
-        List<Post> olderSliced = olderPosts.subList(0,1);
-        olderPosts = olderPosts.subList(1,olderPosts.size());
+        int eval = olderPosts.size() < 10 ? olderPosts.size() : 10;
+        List<Post> olderSliced = olderPosts.subList(0,eval);
+        olderPosts = olderPosts.subList(eval,olderPosts.size());
         oldP.unlock();
-        inUse.lock();
-        postsInUse.addAll(olderSliced);
-        inUse.unlock();
         scrollFlag.compareAndSet(false,true);
-        return postsInUse;
+        
+        return olderSliced;
     }
 
     /*
      * USE THIS METHOD TO UPDATE VIEW WITH NEWER POSTS
      * */
     public List<Post> getUpdatedListNewer() {
+
         if(newerPosts.size() == 0)
-            return postsInUse;
+            return null;
+
         newP.lock();
-        List<Post> newerSliced = newerPosts.subList(0,1);
-        newerPosts = newerPosts.subList(1,newerPosts.size());
+        int eval = newerPosts.size() < 5 ? newerPosts.size() : 5;
+        List<Post> newerSliced = newerPosts.subList(0, eval);
+        newerPosts = newerPosts.subList(eval,newerPosts.size());
         newP.unlock();
-        inUse.lock();
-        postsInUse.addAll(0,newerSliced);
-        inUse.unlock();
-        System.out.println("LISTCHECK!!! "+postsInUse.toString());
-        return postsInUse;
+
+        return newerSliced;
     }
 
 
@@ -234,8 +237,7 @@ public class DataInterface {
     * @return boolean true if succesfully deleted all local user data, false otherwise
     * */
     public boolean logCurrentUserOut(){
-        //sqLite.addToPosts(newerPosts);
-        //sqLite.addToPosts(olderPosts); maybe it makes little sense to save these
+
         killBackgroundSync();
         user = null;
         return sqLite.dropAllTables();
@@ -247,6 +249,7 @@ public class DataInterface {
 
     public void setScrollFlag() {
         scrollFlag.getAndSet(true);
+        System.out.println("SETTING FLAG!!!");
     }
 
 
@@ -259,36 +262,30 @@ public class DataInterface {
 
             olderPosts = mySql.getSpecificNumberOfLowerPosts(10, postsInUse.get(postsInUse.size() - 1).getPostID());
             newerPosts = mySql.getSpecificNumberOfNewerPosts(1,postsInUse.get(0).getTimeStamp());
-            System.out.println("olderPosts: "+olderPosts.size());
+
         }
 
         Thread backgroundThread = new Thread(() -> {
 
 
             while(backgroundSync.get()) {
-                System.out.println("postInUse: "+postsInUse.size());
+                //System.out.println("postInUse: "+postsInUse.size());
 
                 if(isConnected()) {
                     if (newerPosts.size() < 20) {
                         newP.lock();
                         newerPosts.addAll(mySql.getSpecificNumberOfNewerPosts(1,newerPosts.size() != 0 ? newerPosts.get(newerPosts.size()-1).getTimeStamp() : postsInUse.get(0).getTimeStamp()));
-                        System.out.println("newerPosts size: "+newerPosts.size());
+                        //System.out.println("newerPosts size: "+newerPosts.size());
                         newP.unlock();
-                        /*
-                        if(postsInUse.size() < 5) {
-                            postsInUse.addAll(newerPosts);
-                            newerPosts.clear();
-                            System.out.println("Added posts to postInUse!!!");
-                        }
-                        */
+
                     }
 
                     if (scrollFlag.get()) {
                         oldP.lock();
                         olderPosts.addAll(mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID()));
-                        System.out.println("olderPosts size: "+olderPosts.size());
+                        //System.out.println("olderPosts size: "+olderPosts.size());
                         oldP.unlock();
-                        if (olderPosts.size() > 50) {
+                        if (olderPosts.size() > 10) {
                             oldP.lock();
                             List<Post> toSqLite = olderPosts.subList(30, olderPosts.size());
                             olderPosts = olderPosts.subList(0, 30);
