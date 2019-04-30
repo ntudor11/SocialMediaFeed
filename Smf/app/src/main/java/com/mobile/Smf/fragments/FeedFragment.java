@@ -98,6 +98,7 @@ public class FeedFragment extends Fragment {
 
     private void getNewerPostsEvent(){
         Toast.makeText(getContext(),"Getting newer posts...",Toast.LENGTH_SHORT).show();
+        feed.updateWithNewerPosts();
         postRecyclerViewAdapter.notifyDataSetChanged();
 //        feed.updateWithOlderPosts();
 //        postRecyclerViewAdapter.updatePosts(feed.getFeedAsList());
@@ -105,6 +106,7 @@ public class FeedFragment extends Fragment {
 
     private void getOlderPostsEvent(){
         Toast.makeText(getContext(),"Getting older posts...",Toast.LENGTH_SHORT).show();
+        feed.updateWithOlderPosts();
         postRecyclerViewAdapter.notifyDataSetChanged();
 //        feed.updateWithOlderPosts();Toast.makeText(getContext(),"",Toast.LENGTH_LONG).show();
 //        postRecyclerViewAdapter.updatePosts(feed.getFeedAsList());

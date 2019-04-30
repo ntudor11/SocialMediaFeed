@@ -285,7 +285,7 @@ public class DataInterface {
                         olderPosts.addAll(mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID()));
                         //System.out.println("olderPosts size: "+olderPosts.size());
                         oldP.unlock();
-                        if (olderPosts.size() > 10) {
+                        if (olderPosts.size() > 50) {
                             oldP.lock();
                             List<Post> toSqLite = olderPosts.subList(30, olderPosts.size());
                             olderPosts = olderPosts.subList(0, 30);
