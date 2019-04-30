@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.mobile.Smf.R;
 import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.database.DataInterface;
+import com.mobile.Smf.model.Feed;
 import com.mobile.Smf.model.User;
 import com.mobile.Smf.util.PostContentHolder;
 
@@ -32,6 +33,8 @@ public class MakeTextPostFragment extends Fragment {
 
     private int maxNumberOfCharsAllowed = 145; // one better than twitter!
 
+    private Feed feed;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -43,6 +46,7 @@ public class MakeTextPostFragment extends Fragment {
 
         postContentHolder = PostContentHolder.getPostContentHolderSingleton();
         dataInterface = DataInterface.getDataInterface(getContext());
+        feed = Feed.getFeedSingleton(getContext());
 
         textViewHeader = (TextView) makePostView.findViewById(R.id.maketextpost_textview_header);
         textViewNumChars = (TextView) makePostView.findViewById(R.id.maketextpost_textview_numchars);
@@ -92,6 +96,7 @@ public class MakeTextPostFragment extends Fragment {
                                 // go back to feed after posting
                                 postContentHolder.clearData();
                                 Toast.makeText(getContext(), "Uploaded post!", Toast.LENGTH_LONG).show();
+                                feed.updateWithNewerPosts();
                                 Intent intent = new Intent(getContext(), FeedActivity.class);
                                 startActivity(intent);
                             } else {
