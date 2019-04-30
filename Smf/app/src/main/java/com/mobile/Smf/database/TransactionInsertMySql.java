@@ -39,7 +39,6 @@ public class TransactionInsertMySql implements Callable<Boolean> {
             input = new PreparedStatement[1];
             input[0] = con.prepareStatement(params[3]);
             if(pic != null) {
-                System.out.println("bind byte[]");
                 input[0].setBytes(1, pic);
             }
 
@@ -54,7 +53,7 @@ public class TransactionInsertMySql implements Callable<Boolean> {
 
             con.commit();
 
-            Log.d("TransactionInsertMySql", "Transation committed");
+            //Log.d("TransactionInsertMySql", "Transation committed");
 
             return true;
 

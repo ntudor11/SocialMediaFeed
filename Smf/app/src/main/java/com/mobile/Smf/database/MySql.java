@@ -302,7 +302,7 @@ public class MySql {
 
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
             ResultSet rs = f.get();
-            Log.d("SpecificNumfNewerPosts",""+rs);
+            //Log.d("SpecificNumfNewerPosts",""+rs);
 
 
             rs.first();
@@ -334,9 +334,6 @@ public class MySql {
         ArrayList<Post> returnList = new ArrayList<>();
 
         try {
-            //String arg =  String.format(Locale.getDefault(),"SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
-                    //"FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
-                    //"LEFT JOIN PicturePosts pic ON p.postID = pic.postID WHERE p.tStamp < %d ORDER BY p.tStamp DESC LIMIT %d;",t.getSystemTime(), numberOfPosts);
 
             String arg = String.format(Locale.getDefault(),
             "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture " +

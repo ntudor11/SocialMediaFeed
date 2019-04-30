@@ -134,15 +134,12 @@ public class SqLite extends SQLiteOpenHelper {
         User returnVal = null;
         try {
 
-
-
             Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
-            System.out.println("TEEEEEEST");
+
             print(res);
             if(!((res != null) && (res.getCount() > 0)))
                     return returnVal;
             res.moveToFirst();
-            print(res);
             res.moveToFirst();
             returnVal = new User (res.getInt(0),res.getString(1),res.getString(2),res.getString(3),res.getString(4),res.getInt(5));
 
@@ -183,12 +180,10 @@ public class SqLite extends SQLiteOpenHelper {
         return userID;
     }
 
+    // Deprecated - delete when sure it is not going to be used
     public boolean checkIfValidLogin(String userName, String password) {
 
-
         Cursor cursor = mydatabase.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Profile_info';",null);
-        //if(!((cursor != null) && (cursor.getCount() > 0)))
-            //return false;
 
         cursor.moveToFirst();
         if(cursor.getInt(0) == 0)
@@ -243,18 +238,18 @@ public class SqLite extends SQLiteOpenHelper {
             SQLiteStatement stmtPicturePost = mydatabase.compileStatement(argPicturePost);
 
             for(Post p : list) {
-                stmtPost.bindLong(0,p.getPostID());
-                stmtPost.bindLong(1,p.getPostType());
-                stmtPost.bindString(2,p.getUserName());
-                stmtPost.bindLong(3,p.getTimeStamp());
-                stmtPost.bindString(4,p.getUniversalTimeStamp());
-                stmtPost.bindString(5,p.getLocalTimeStamp());
+                stmtPost.bindLong(1,p.getPostID());
+                stmtPost.bindLong(2,p.getPostType());
+                stmtPost.bindString(3,p.getUserName());
+                stmtPost.bindLong(4,p.getTimeStamp());
+                stmtPost.bindString(5,p.getUniversalTimeStamp());
+                stmtPost.bindString(6,p.getLocalTimeStamp());
                 stmtPost.execute();
                 stmtPost.clearBindings();
 
                 if(p.getPostType() == 0) {
-                    stmtTextPost.bindLong(0,p.getPostID());
-                    stmtTextPost.bindString(1,((TextPost) p).getText());
+                    stmtTextPost.bindLong(1,p.getPostID());
+                    stmtTextPost.bindString(2,((TextPost) p).getText());
                     stmtTextPost.execute();
                     stmtTextPost.clearBindings();
 
@@ -265,8 +260,8 @@ public class SqLite extends SQLiteOpenHelper {
                     ((PicturePost)p).getPicture().compress(Bitmap.CompressFormat.JPEG,50,stream);
 
                     byte[] pic = stream.toByteArray();
-                    stmtPicturePost.bindLong(0,p.getPostID());
-                    stmtPicturePost.bindBlob(1,pic);
+                    stmtPicturePost.bindLong(1,p.getPostID());
+                    stmtPicturePost.bindBlob(2,pic);
                     stmtPicturePost.execute();
                     stmtPicturePost.clearBindings();
                 }
@@ -286,24 +281,26 @@ public class SqLite extends SQLiteOpenHelper {
     }
 
 
-    public ArrayList<Post> getOlderPosts(long timeStamp) {
-        ArrayList<Post> returnList = new ArrayList<>();
+    public List<Post> getOlderPosts(long timeStamp) {
+
+        List<Post> returnList = new ArrayList<>();
 
         try {
             Cursor c = mydatabase.rawQuery(String.format(Locale.getDefault(),
-                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
-                    "FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
-                    "LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp < %d ORDER BY p.tStamp DESC;",timeStamp),null);
+                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.uniTime, p.locTime, t.postText, pic.picture" +
+                    " FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
+                    " LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp < %d ORDER BY p.tStamp DESC;",timeStamp),null);
 
             c.moveToFirst();
             while(!c.isAfterLast()) {
                 if(c.getInt(0) == 0) {
-                    returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),c.getString(5)));
+                        returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),c.getString(5)));
                 } else if(c.getInt(0) == 1){
-                    byte[] bytePic = c.getBlob(6);
+                    byte[] bytePic = c.getBlob(7);
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
                     returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),c.getString(5)));
                 }
+                c.moveToNext();
             }
 
         } catch (Exception e) {e.printStackTrace();}
@@ -311,14 +308,16 @@ public class SqLite extends SQLiteOpenHelper {
         return returnList;
     }
 
-    public ArrayList<Post> getNewerPosts(long timeStamp) {
-        ArrayList<Post> returnList = new ArrayList<>();
+    public List<Post> getNewerPosts(long timeStamp) {
+        List<Post> returnList = new ArrayList<>();
 
         try {
             Cursor c = mydatabase.rawQuery(String.format(Locale.getDefault(),
                     "SELECT p.postType, p.postID, p.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
-                            "FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
-                            "LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp > %d ORDER BY p.tStamp DESC;",timeStamp),null);
+                            " FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
+                            " LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp > %d ORDER BY p.tStamp DESC;",timeStamp),null);
+
+            print(c);
 
             c.moveToFirst();
             while(!c.isAfterLast()) {
@@ -329,6 +328,7 @@ public class SqLite extends SQLiteOpenHelper {
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
                     returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),c.getString(5)));
                 }
+                c.moveToNext();
             }
 
         } catch (Exception e) {e.printStackTrace();}
@@ -365,7 +365,6 @@ public class SqLite extends SQLiteOpenHelper {
                             System.out.println("String at index "+i+" : "+c.getString(i));
                             break;
 
-
                     }
                 }
                 c.moveToNext();
@@ -383,9 +382,7 @@ public class SqLite extends SQLiteOpenHelper {
 
             c.moveToFirst();
             print(c);
-
     }
-
 
 }
 

@@ -27,11 +27,11 @@ public class InsertMySql implements Callable<Boolean> {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(DB_URL, user, pass);
 
-            Log.d("InsertMySql", "Connection established");
+            //Log.d("InsertMySql", "Connection established");
 
             Statement st = con.createStatement();
 
-            Log.d("Insert -instruction", instruction);
+            //Log.d("Insert -instruction", instruction);
 
             int eval = st.executeUpdate(instruction);
 

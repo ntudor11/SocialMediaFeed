@@ -25,7 +25,7 @@ public class queryMySql implements Callable<ResultSet> {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(DB_URL, user, pass);
-            Log.d("queryMySql", "Connection established");
+            //Log.d("queryMySql", "Connection established");
 
             Statement st = con.createStatement();
 
