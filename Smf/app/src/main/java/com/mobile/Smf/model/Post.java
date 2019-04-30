@@ -2,26 +2,24 @@ package com.mobile.Smf.model;
 
 import com.mobile.Smf.util.PostTypeInterface;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public abstract class Post implements PostTypeInterface {
 
     private int postID;
     private String userName;
-    private Date timeStamp;
+    private long timeStamp;
+    private String localTimeStamp;
+    private String universalTimeStamp;
 
     public abstract int getPostType();
 
-    public Post(int postID, String userName, Date timeStamp){
+    public Post(int postID, String userName, long timeStamp, String localTime, String universalTime){
         this.postID = postID;
         this.userName = userName;
         this.timeStamp = timeStamp;
+        this.localTimeStamp = localTime;
+        this.universalTimeStamp = universalTime;
     }
 
-    public String getTimeStampAsStr(){
-        return new SimpleDateFormat("hh:mm dd/MM/yyyy").format(timeStamp);
-    }
 
     public int getPostID() {
         return postID;
@@ -39,12 +37,18 @@ public abstract class Post implements PostTypeInterface {
         this.userName = userName;
     }
 
-    public Date getTimeStamp() {
-        return timeStamp;
+   public long getTimeStamp() {
+       return timeStamp;
+   }
+
+    public String getLocalTimeStamp() {
+        return localTimeStamp;
     }
 
-    public void setTimeStamp(Date timeStamp) {
-        this.timeStamp = timeStamp;
+    public String getUniversalTimeStamp() {
+        return universalTimeStamp;
     }
+
+   //public void setTimeStamp(Date timeStamp) { this.timeStamp = timeStamp; }
 
 }

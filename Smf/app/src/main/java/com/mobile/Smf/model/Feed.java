@@ -5,6 +5,7 @@
 
 package com.mobile.Smf.model;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -26,14 +27,15 @@ public class Feed {
 
     private String loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sollicitudin, lectus in euismod pharetra, mauris felis suscipit quam, vel malesuada turpis enim quis tellus. Praesent maximus fermentum imperdiet. Aenean efficitur sem lorem, quis imperdiet sem hendrerit malesuada. Vivamus porta gravida nibh, sed aliquet eros finibus a. Integer ullamcorper leo dictum ipsum tempor fermentum. Donec in sem vitae magna tristique venenatis. Vivamus in mauris magna. Integer finibus, ipsum at porttitor maximus, sapien tortor interdum sapien, sit amet dictum lacus orci in libero. ";
 
-    private Feed(){
+    private Feed(Context context){
+        datainterface = DataInterface.getDataInterface(context);
         feed_as_list = new ArrayList<>();
-        // fillFeed();
-         createSomeTestPosts();
+         fillFeed();
+         //createSomeTestPosts();
     }
 
-    public static Feed getFeedSingleton(){
-        if (feedSingleton == null) feedSingleton = new Feed();
+    public static Feed getFeedSingleton(Context context){
+        if (feedSingleton == null) feedSingleton = new Feed(context);
         return feedSingleton;
     }
 
@@ -46,9 +48,10 @@ public class Feed {
     * todo rework
     * */
     public void fillFeed(){
-        feed_as_list = datainterface.getAllPosts();
+        feed_as_list = datainterface.getFirstTenPosts();
     }
 
+    /*
     private void createSomeTestPosts(){
         feed_as_list.add(new TextPost(1, "testUser1",new Date(100000000),loremIpsum));
         feed_as_list.add(new PicturePost(4, "testUser4",new Date(400000000),createImage(1000,1000, Color.BLUE)));
@@ -64,6 +67,7 @@ public class Feed {
         feed_as_list.add(new PicturePost(12, "testUser12",new Date(1200000000),createImage(1000,1000, Color.BLACK)));
 
     }
+    */
 
     /**
      * todo put this somewhere else

@@ -1,17 +1,15 @@
 package com.mobile.Smf.model;
 
-import java.util.Date;
-
 public class TextPost extends Post {
 
-    private static final int postType = 0; // was 1
-    @Override
-    public int getPostType(){return postType;}
+
+    private static final int postType = 0;
 
     private String text;
 
-    public TextPost(int postID, String userName, Date timeStamp, String text){
-        super(postID,userName,timeStamp);
+
+    public TextPost(int postID, String userName, long timeStamp, String text, String localTime, String universalTime){
+        super(postID,userName,timeStamp,localTime, universalTime);
         this.text = text;
     }
 
@@ -19,8 +17,14 @@ public class TextPost extends Post {
         return text;
     }
 
+
     public void setText(String text) {
         this.text = text;
     }
+
+
+
+    @Override
+    public int getPostType(){return postType;}
 
 }

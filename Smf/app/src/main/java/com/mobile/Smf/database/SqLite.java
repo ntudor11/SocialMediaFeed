@@ -6,13 +6,26 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import com.mobile.Smf.model.PicturePost;
+import com.mobile.Smf.model.Post;
+import com.mobile.Smf.model.TextPost;
 import com.mobile.Smf.model.User;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.database.Cursor.FIELD_TYPE_BLOB;
+import static android.database.Cursor.FIELD_TYPE_FLOAT;
+import static android.database.Cursor.FIELD_TYPE_INTEGER;
+import static android.database.Cursor.FIELD_TYPE_NULL;
+import static android.database.Cursor.FIELD_TYPE_STRING;
 
 public class SqLite extends SQLiteOpenHelper {
 
@@ -37,7 +50,7 @@ public class SqLite extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        setUpSchemas(db);
+        setUpSchemas();
     }
 
 
@@ -68,39 +81,73 @@ public class SqLite extends SQLiteOpenHelper {
     }
 
 //Use this to set up all
-    private void setUpSchemas(SQLiteDatabase db) {
+    public void setUpSchemas() {
         try {
-            //db.execSQL("DROP TABLE IF EXISTS Profile_info");
-            db.execSQL("CREATE TABLE IF NOT EXISTS Profile_info (id int, name VARCHAR(100) NOT NULL, " +
+            //mydatabase.execSQL("DROP TABLE IF EXISTS Profile_info;");
+            //mydatabase.execSQL("DROP TABLE IF EXISTS PostsSync;");
+            //mydatabase.execSQL("DROP TABLE IF EXISTS TextPostsSync;");
+            //mydatabase.execSQL("DROP TABLE IF EXISTS PicturePostsSync;");
+
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS Profile_info (id int, name VARCHAR(100) NOT NULL, " +
                     "password VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, " +
                     "country VARCHAR(100), birthYear int );");
+
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PostsSync (postID int NOT NULL, postType int NOT NULL," +
+                    "userName VARCHAR(100), tStamp INTEGER NOT NULL, uniTime VARCHAR(14), locTime VARCHAR(14));");
+
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS TextPostsSync (postID int NOT NULL, postText VARCHAR(145) NOT NULL);");
+
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PicturePostsSync (postID int NOT NULL, picture BLOB NOT NULL);");
+
+
         } catch(SQLException e) {e.printStackTrace();}
     }
 
 
     //Interface
 
-    public boolean syncProfileInfoFromMySql(User self) {
 
-        Cursor c = this.getProfileInfo(self.getEmail(),self.getUserName());
-        if(self.getUserName().equals(c.getString(1)) && self.getEmail().equals(c.getString(3))) {
+    public boolean syncProfileInfoFromMySql(User user) {
+
+        setUpSchemas();
+        boolean returnVal = false;
+
+        System.out.println("Sync profile  -->  userID "+user.getId()+" "+user.getUserName());
 
             ContentValues contentValues = new ContentValues();
-            contentValues.put("id", self.getId());
-            contentValues.put("name", self.getUserName());
-            contentValues.put("password", self.getPassword());
-            contentValues.put("email", self.getEmail());
-            contentValues.put("country", self.getCountry());
-            contentValues.put("birthYear", self.getBirthYear());
+            contentValues.put("id", user.getId());
+            contentValues.put("name", user.getUserName());
+            contentValues.put("password", user.getPassword());
+            contentValues.put("email", user.getEmail());
+            contentValues.put("country", user.getCountry());
+            contentValues.put("birthYear", user.getBirthYear());
 
             long eval = mydatabase.insert("Profile_info", null, contentValues);
-                if(eval != -1)
-                    return true;
-                else
-                    return false;
-        } else
-            return false;
+                if(eval != -1) {
+                    returnVal = true;
+                }
 
+        return returnVal;
+    }
+
+    public User getLoggedInUser() {
+        User returnVal = null;
+        try {
+
+
+
+            Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
+            System.out.println("TEEEEEEST");
+            print(res);
+            if(!((res != null) && (res.getCount() > 0)))
+                    return returnVal;
+            res.moveToFirst();
+            print(res);
+            res.moveToFirst();
+            returnVal = new User (res.getInt(0),res.getString(1),res.getString(2),res.getString(3),res.getString(4),res.getInt(5));
+
+        } catch (SQLException e) {e.printStackTrace();}
+        return returnVal;
     }
 
     //could also be made to return a list
@@ -115,14 +162,44 @@ public class SqLite extends SQLiteOpenHelper {
     }
 
     public String getUserName() {
-        Cursor res = null;
+
         String userName = null;
         try {
-            res = mydatabase.rawQuery("SELECT name FROM Profile_info ;", null);
+            Cursor res = mydatabase.rawQuery("SELECT name FROM Profile_info ;", null);
             userName = res.getString(0);
 
         } catch (SQLException e) {e.printStackTrace();}
         return userName;
+    }
+
+    public int getUserID() {
+
+        int userID = -1;
+        try {
+            Cursor res = mydatabase.rawQuery("SELECT userID FROM Profile_info ;", null);
+            userID = res.getInt(0);
+
+        } catch (SQLException e) {e.printStackTrace();}
+        return userID;
+    }
+
+    public boolean checkIfValidLogin(String userName, String password) {
+
+
+        Cursor cursor = mydatabase.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Profile_info';",null);
+        //if(!((cursor != null) && (cursor.getCount() > 0)))
+            //return false;
+
+        cursor.moveToFirst();
+        if(cursor.getInt(0) == 0)
+            return false;
+        else {
+            Cursor cur = mydatabase.rawQuery("SELECT * FROM Profile_info;",null);
+            cur.moveToFirst();
+            if(!(cur.getString(1).equals(userName) || cur.getString(2).equals(password)))
+                return false;
+        }
+        return true;
     }
 
 
@@ -132,6 +209,7 @@ public class SqLite extends SQLiteOpenHelper {
         try {
             List<String> tables = new ArrayList<>(cursor.getCount());
 
+            cursor.moveToFirst();
             while (cursor.moveToNext()) {
                 tables.add(cursor.getString(0));
             }
@@ -142,16 +220,172 @@ public class SqLite extends SQLiteOpenHelper {
                 }
                 mydatabase.execSQL("DROP TABLE IF EXISTS " + table);
             }
-            Cursor deletetest = mydatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
-            if(deletetest == null)
-                return true;
-            else
-                return false;
+            return true;
 
         } finally {
             cursor.close();
         }
     }
+
+
+    public boolean addToPosts(ArrayList<Post> list) {
+
+        boolean returnVal = false;
+
+
+        String argPost = "INSERT INTO PostsSync (postID,postType,userName,tStamp,uniTime,locTime) VALUES (?,?,?,?,?,?);";
+        String argTextPost = "INSERT INTO TextPostsSync (postID,postText) VALUES (?,?);";
+        String argPicturePost = "INSERT INTO PicturesPostSync (postID, picture) VALUES (?,?);";
+        try {
+            mydatabase.beginTransaction();
+            SQLiteStatement stmtPost = mydatabase.compileStatement(argPost);
+            SQLiteStatement stmtTextPost = mydatabase.compileStatement(argTextPost);
+            SQLiteStatement stmtPicturePost = mydatabase.compileStatement(argPicturePost);
+
+            for(Post p : list) {
+                stmtPost.bindLong(0,p.getPostID());
+                stmtPost.bindLong(1,p.getPostType());
+                stmtPost.bindString(2,p.getUserName());
+                stmtPost.bindLong(3,p.getTimeStamp());
+                stmtPost.bindString(2,p.getUniversalTimeStamp());
+                stmtPost.bindString(2,p.getLocalTimeStamp());
+                stmtPost.execute();
+                stmtPost.clearBindings();
+
+                if(p.getPostType() == 0) {
+                    stmtTextPost.bindLong(0,p.getPostID());
+                    stmtTextPost.bindString(1,((TextPost) p).getText());
+                    stmtTextPost.execute();
+                    stmtTextPost.clearBindings();
+
+                } else if(p.getPostType() == 1) {
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+                    // if better picture quality is needed play with quality parameter
+                    ((PicturePost)p).getPicture().compress(Bitmap.CompressFormat.JPEG,50,stream);
+
+                    byte[] pic = stream.toByteArray();
+                    stmtPicturePost.bindLong(0,p.getPostID());
+                    stmtPicturePost.bindBlob(1,pic);
+                    stmtPicturePost.execute();
+                    stmtPicturePost.clearBindings();
+                }
+            }
+
+            mydatabase.setTransactionSuccessful();
+
+        } catch(IllegalStateException e) {e.printStackTrace();}
+        catch (SQLException ex) {ex.printStackTrace();}
+
+        finally {
+            mydatabase.endTransaction();
+            returnVal = true;
+        }
+
+        return returnVal;
+    }
+
+
+    public ArrayList<Post> getOlderPosts(long timeStamp) {
+        ArrayList<Post> returnList = new ArrayList<>();
+
+        try {
+            Cursor c = mydatabase.rawQuery(String.format(Locale.getDefault(),
+                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
+                    "FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
+                    "LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp < %d ORDER BY p.tStamp DESC;",timeStamp),null);
+
+            c.moveToFirst();
+            while(!c.isAfterLast()) {
+                if(c.getInt(0) == 0) {
+                    returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),c.getString(5)));
+                } else if(c.getInt(0) == 1){
+                    byte[] bytePic = c.getBlob(6);
+                    Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
+                    returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),c.getString(5)));
+                }
+            }
+
+        } catch (Exception e) {e.printStackTrace();}
+
+        return returnList;
+    }
+
+    public ArrayList<Post> getNewerPosts(long timeStamp) {
+        ArrayList<Post> returnList = new ArrayList<>();
+
+        try {
+            Cursor c = mydatabase.rawQuery(String.format(Locale.getDefault(),
+                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
+                            "FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
+                            "LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp > %d ORDER BY p.tStamp DESC;",timeStamp),null);
+
+            c.moveToFirst();
+            while(!c.isAfterLast()) {
+                if(c.getInt(0) == 0) {
+                    returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),c.getString(5)));
+                } else if(c.getInt(0) == 1){
+                    byte[] bytePic = c.getBlob(6);
+                    Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
+                    returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),c.getString(5)));
+                }
+            }
+
+        } catch (Exception e) {e.printStackTrace();}
+
+        return returnList;
+    }
+
+    //helper methods
+
+    private void print(Cursor c) {
+        System.out.println("PRINTCHECK");
+        if(((c != null) && (c.getCount() > 0))) {
+            c.moveToFirst();
+
+            int rowNumb = 0;
+            while(!c.isAfterLast()) {
+                int collumCount = c.getColumnCount();
+                System.out.println("Row numb : "+rowNumb++);
+                for(int i = 0; i < collumCount; i++) {
+                    switch(c.getType(i)){
+                        case FIELD_TYPE_INTEGER:
+                            System.out.println("Integer at index "+i+" : "+c.getInt(i));
+                            break;
+                        case FIELD_TYPE_NULL:
+                            System.out.println("Null at index "+i+" : Null");
+                            break;
+                        case FIELD_TYPE_FLOAT:
+                            System.out.println("Float at index "+i+" : "+c.getFloat(i));
+                            break;
+                        case FIELD_TYPE_BLOB:
+                            System.out.println("Blob at index "+i+" : "+c.getBlob(i));
+                            break;
+                        case FIELD_TYPE_STRING:
+                            System.out.println("String at index "+i+" : "+c.getString(i));
+                            break;
+
+
+                    }
+                }
+                c.moveToNext();
+
+            }
+        } else {
+            System.out.println("Printcheck: c="+ c +" c count ="+c.getCount());
+        }
+    }
+
+    public void checkTables() {
+
+            Cursor c = mydatabase.rawQuery(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';",null);
+
+            c.moveToFirst();
+            print(c);
+
+    }
+
 
 }
 

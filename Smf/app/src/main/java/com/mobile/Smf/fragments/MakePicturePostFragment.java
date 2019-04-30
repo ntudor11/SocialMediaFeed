@@ -73,7 +73,7 @@ public class MakePicturePostFragment extends Fragment {
 
         //SqLite.syncProfileInfoFromMySql has not been called during login, and should be
         //then the date for getLoggedInUser can be uptained from SqLite
-        dataInterface = new DataInterface(getContext());
+        dataInterface = DataInterface.getDataInterface(getContext());
 
         textViewHeader = (TextView) makePicturePostView.findViewById(R.id.makepicturepost_textview_header);
         imageViewPicture = (ImageView) makePicturePostView.findViewById(R.id.makepicturepost_imageview_picure);

@@ -3,6 +3,7 @@ package com.mobile.Smf.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.mobile.Smf.R;
 import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.activities.SignupActivity;
 import com.mobile.Smf.database.DataInterface;
+import com.mobile.Smf.model.User;
 
 public class LoginFragment extends Fragment {
 
@@ -32,9 +34,21 @@ public class LoginFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        View loginView = inflater.inflate(R.layout.fragment_login, container,false);
 
-        dataInterface = new DataInterface(getContext());
+        dataInterface = DataInterface.getDataInterface(getContext());
+
+        User user = dataInterface.getLoggedInUser();
+        if(user != null) {
+            // make this screen size dependent
+            Toast toast = Toast.makeText(getContext(),"Logged in as "+user.getUserName(), Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP | Gravity.RIGHT, 350, 800);
+            toast.show();
+
+            Intent intent = new Intent(getContext(), FeedActivity.class);
+            startActivity(intent);
+        }
+
+        View loginView = inflater.inflate(R.layout.fragment_login, container,false);
 
         usernameTextView = (TextView) loginView.findViewById(R.id.login_textview_username);
         usernameTextView.setText(R.string.login_username);

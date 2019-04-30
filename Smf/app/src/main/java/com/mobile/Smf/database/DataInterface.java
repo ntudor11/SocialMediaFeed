@@ -7,22 +7,78 @@ package com.mobile.Smf.database;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.mobile.Smf.model.Post;
 import com.mobile.Smf.model.User;
+import com.mobile.Smf.util.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 public class DataInterface {
 
-    MySql mySql;
-    SqLite sqLite;
+    private MySql mySql;
+    private SqLite sqLite;
+    private User user;
+    private Context context; //not sure about this
+    private ArrayList<Post> postsInUse;
+    private ArrayList<Post> newerPosts;
+    private ArrayList<Post> olderPosts;
 
-    public DataInterface(Context context){
+    // Background synchronization control elements
+    private AtomicBoolean backgroundSync;
+    private AtomicBoolean scrollFlag;
+    private ReentrantLock inUse = new ReentrantLock();
+    private ReentrantLock newP = new ReentrantLock();
+    private ReentrantLock oldP = new ReentrantLock();
 
+    //Network related
+    private ConnectivityManager connectivityManager;
+    private  NetworkInfo activeNetworkInfo;
+
+    private static DataInterface dataInterface;
+
+    private DataInterface(Context context){
+
+        this.context = context;
         mySql = MySql.getMySql();
         sqLite = SqLite.getSqLite(context);
+        getUserFromCookie();
+        setUpNetworkFields();
+        getInitialPosts();
+        backgroundSync = new AtomicBoolean(true);
+        scrollFlag = new AtomicBoolean(true);
+
+        startBackGroundSync();
+    }
+
+    public static DataInterface getDataInterface(Context context) {
+        if(dataInterface == null)
+            dataInterface = new DataInterface(context);
+        return dataInterface;
+    }
+
+    private void getInitialPosts() {
+        if(isConnected()) {
+            postsInUse = mySql.getInitialPosts();
+
+        } else {
+            //todo check sqlite for posts or throw exception
+        }
+    }
+
+    public ArrayList<Post> getFirstTenPosts() {
+        return postsInUse;
+    }
+
+    private void getUserFromCookie() {
+        user = sqLite.getLoggedInUser();
     }
 
     /*
@@ -32,7 +88,15 @@ public class DataInterface {
     * @return boolean true if valid login, false if invalid
     * */
     public boolean checkIfValidLogin(String userName, String password){
-        return mySql.checkIfValidLogin(userName, password);
+        boolean returnVal = false;
+        sqLite.setUpSchemas();
+            if(mySql.checkIfValidLogin(userName, password)) {
+                User u = mySql.getUser(userName);
+                if(sqLite.syncProfileInfoFromMySql(u)){
+                    returnVal = true;
+                }
+            }
+        return returnVal;
     }
 
     /*
@@ -54,28 +118,35 @@ public class DataInterface {
     * @param birthYear int year
     * @return newly created user
     * */
-    public User addNewUser(String userName, String password, String email, String country, int birthYear){
-        //User newUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return mySql.addNewUser(userName,password,email,country,birthYear);
+    public boolean addNewUser(String userName, String password, String email, String country, int birthYear){
+       boolean returnVal = false;
+
+        User user = mySql.addNewUser(userName,password,email,country,birthYear);
+        //Log.d("addNewUser",""+user);
+        if(user != null)
+            if(sqLite.syncProfileInfoFromMySql(user))
+                returnVal = true;
+
+        return returnVal;
     }
 
     /*
     * get the currently logged in user
     * @return User currently logged in user
     * */
+
     public User getLoggedInUser(){
-        User currentUser = new User(1,"test user","test","test@test.test","test land",2019);
-        return currentUser;
-        //return mySql.getLoggedInUser(sqLite.getUserName());
+        user = sqLite.getLoggedInUser();
+        return user ;
     }
+
 
     /*
     * returns all posts, intended for development
     * @return List<Post> list of all posts
     * */
     public List<Post> getAllPosts(){
-        List<Post> returnList = new ArrayList<>();
-        return returnList;
+        return mySql.getAllPosts();
     }
 
     /*
@@ -84,8 +155,7 @@ public class DataInterface {
     * @return List<Post> returns a list of posts to be prepended
     * */
     public List<Post> getSpecificNumberOfNewerPosts(int numberOfPosts){
-        List<Post> returnList = new ArrayList<>();
-        return returnList;
+        return mySql.getSpecificNumberOfNewerPosts(numberOfPosts);
     }
 
     /*
@@ -93,9 +163,8 @@ public class DataInterface {
     * @param numberOfPosts int number of posts to get
     * @return List<Post> returns a list of posts to be appended
     * */
-    public List<Post> getSpecificNumberOfLowerPosts(int numberOfPosts){
-        List<Post> returnList = new ArrayList<>();
-        return returnList;
+    public List<Post> getSpecificNumberOfLowerPosts(int numberOfPosts, int oldestPostID){
+        return mySql.getSpecificNumberOfLowerPosts(numberOfPosts, oldestPostID);
     }
 
     /*
@@ -105,8 +174,39 @@ public class DataInterface {
     * @return boolean true if successful upload, false if upload fails
     * */
     public boolean uploadTextPost(String text){
-        return true;
+        Timestamp t = new Timestamp();
+        Log.d("uploadTextPost", "UserName"+user.getUserName()+" userID "+user.getId());
+        return mySql.uploadTextPost(user.getId(), text, t.getSystemTime(), t.getLocalTime(), t.getUniversalTime());
     }
+
+    /*
+    * USE THIS METHOD TO UPDATE VIEW WITH OLDER POSTS
+    * */
+    public ArrayList<Post> getUpdatedListOlder() {
+        oldP.lock();
+        ArrayList<Post> olderSliced = (ArrayList<Post>) olderPosts.subList(0,10);
+        olderPosts = (ArrayList<Post>) olderPosts.subList(10,olderPosts.size());
+        oldP.unlock();
+        inUse.lock();
+        postsInUse.addAll(olderSliced);
+        inUse.unlock();
+        return postsInUse;
+    }
+
+    /*
+     * USE THIS METHOD TO UPDATE VIEW WITH NEWER POSTS
+     * */
+    public ArrayList<Post> getUpdatedListNewer() {
+        newP.lock();
+        ArrayList<Post> newerSliced = (ArrayList<Post>) newerPosts.subList(0,10);
+        newerPosts = (ArrayList<Post>) newerPosts.subList(10,newerPosts.size());
+        newP.unlock();
+        inUse.lock();
+        postsInUse.addAll(0,newerSliced);
+        inUse.unlock();
+        return postsInUse;
+    }
+
 
     /*
      * uploads a new PicturePost to MySql server.
@@ -115,7 +215,10 @@ public class DataInterface {
      * @return boolean true if successful upload, false if upload fails
      * */
     public boolean uploadPicturePost(Bitmap picture){
-        return true;
+
+        Timestamp t = new Timestamp();
+        return mySql.uploadPicturePost(user.getId(), picture, t.getSystemTime(),t.getLocalTime(),t.getUniversalTime());
+
     }
 
     /*
@@ -123,6 +226,98 @@ public class DataInterface {
     * @return boolean true if succesfully deleted all local user data, false otherwise
     * */
     public boolean logCurrentUserOut(){
+        //sqLite.addToPosts(newerPosts);
+        //sqLite.addToPosts(olderPosts); maybe it makes little sense to save these
+        killBackgroundSync();
+        user = null;
         return sqLite.dropAllTables();
     }
-}
+
+    public void killBackgroundSync() {
+        backgroundSync.getAndSet(false);
+    }
+
+    public void setScrollFlag() {
+        scrollFlag.getAndSet(true);
+    }
+
+
+
+
+
+    private void startBackGroundSync() {
+
+        // read values into sqLite when local list gets to long --> do this tomorrow
+        // maybe adjustments should be made to how many we read in to begin with and save in sqlite
+
+        if(isConnected()) {
+            olderPosts = mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID());
+            newerPosts = mySql.getSpecificNumberOfNewerPosts(10);
+        }
+
+        Thread backgroundThread = new Thread(() -> {
+
+
+            while(backgroundSync.get()) {
+
+                if(isConnected()) {
+                    if (newerPosts.size() < 20) {
+                        newP.lock();
+                        newerPosts.addAll(mySql.getSpecificNumberOfNewerPosts(10));
+                        newP.unlock();
+                    }
+
+                    if (scrollFlag.get()) {
+                        oldP.lock();
+                        olderPosts.addAll(mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID()));
+                        oldP.unlock();
+                        if (olderPosts.size() > 50) {
+                            oldP.lock();
+                            ArrayList<Post> toSqLite = (ArrayList<Post>) olderPosts.subList(30, olderPosts.size());
+                            olderPosts = (ArrayList<Post>) olderPosts.subList(0, 30);
+                            oldP.unlock();
+                            scrollFlag.compareAndSet(true, false);
+                            sqLite.addToPosts(toSqLite);
+
+                        }
+                    }
+                }
+
+                try {
+                    Thread.sleep(5000);
+                } catch(InterruptedException e) {e.printStackTrace();}
+
+                if(newerPosts.size() > 25) {
+                    newP.lock();
+                    ArrayList<Post> toSqLite = (ArrayList<Post>) newerPosts.subList(0,10);
+                    newerPosts = (ArrayList<Post>) newerPosts.subList(10,newerPosts.size());
+                    newP.unlock();
+                    sqLite.addToPosts(toSqLite);
+                }
+            }
+        });
+
+        backgroundThread.start();
+
+    }
+
+    private void setUpNetworkFields() {
+
+        if(connectivityManager == null) {
+            connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+        }
+        if(activeNetworkInfo == null) {
+            activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+    }
+
+    public boolean isConnected() {
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    public void checkSqLiteTables(){
+        System.out.println("checkSqLiteTables");
+        sqLite.checkTables();
+    }
+
+} //end class

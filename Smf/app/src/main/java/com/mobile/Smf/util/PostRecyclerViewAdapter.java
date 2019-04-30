@@ -101,7 +101,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         @Override
         public void bind(TextPost tPost){
             textViewUsername.setText(tPost.getUserName());
-            textViewTimestamp.setText(tPost.getTimeStampAsStr());
+            textViewTimestamp.setText(tPost.getUniversalTimeStamp());
             textViewText.setText(tPost.getText());
 
             like.setOnClickListener(new View.OnClickListener() {
@@ -142,7 +142,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         @Override
         public void bind(PicturePost pPost){
             textViewUsername.setText(pPost.getUserName());
-            textViewTimestamp.setText(pPost.getTimeStampAsStr());
+            textViewTimestamp.setText(pPost.getUniversalTimeStamp());
             imageViewPicture.setImageBitmap(pPost.getPicture());
 
             like.setOnClickListener(new View.OnClickListener() {

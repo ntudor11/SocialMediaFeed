@@ -32,7 +32,7 @@ public class FeedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View feedView = inflater.inflate(R.layout.fragment_feed, container, false);
 
-        feed = getFeedSingleton();
+        feed = getFeedSingleton(getContext());
 
         feedRecyclerView = (RecyclerView) feedView.findViewById(R.id.feed_recyclerview);
         feedRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
