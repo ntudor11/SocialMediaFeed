@@ -153,5 +153,5 @@ public class Timestamp {
     public int getLocalSec() {
         return localSec;
     }
-    
+
 }
