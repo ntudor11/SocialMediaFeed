@@ -141,7 +141,7 @@ public class MakePicturePostFragment extends Fragment {
                 pictureFile = createImageFile();
             }
             catch (IOException e){
-                Log.d("MakePicturePosTFragment","Could not create pictureFile");
+                Log.d("MPP","Could not create pictureFile");
             }
             if (pictureFile != null){
                 Uri pictureURI = FileProvider.getUriForFile(getContext(),"com.mobile.Smf.fileprovider",pictureFile);
@@ -226,20 +226,12 @@ public class MakePicturePostFragment extends Fragment {
     }
 
     private Bitmap getPlaceHolderImage(){
-
-//        Display display = getActivity().getWindowManager().getDefaultDisplay();
-//        Point size = new Point();
-//        display.getSize(size);
-//        int width = size.x;
-//        int height = size.y;
-        // Log.e("derp",""+width); //1080
-        // Log.e("derp",""+height); //1794
-        int width = 960;
-        int height = 960;
-
-
-        // todo proper implementation - appropriate file: drawable/image_placeholder
-        return feed.createImage(width,height/2, Color.BLACK);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 5;
+        options.outWidth = 960;
+        options.outHeight = 960;
+        Bitmap placeHolder = BitmapFactory.decodeResource(getResources(),R.drawable.image_placeholder,options);
+        return placeHolder;
     }
 
 
