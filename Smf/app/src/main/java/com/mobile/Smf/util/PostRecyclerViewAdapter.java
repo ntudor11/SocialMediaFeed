@@ -28,6 +28,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private static final int TYPE_TEXT_POST = 0;
     private static final int TYPE_PICTURE_POST = 1;
 
+    private boolean hasGottenNewPosts = false;
+
     private List<Post> posts;
 
     public PostRecyclerViewAdapter(List<Post> newPosts){
@@ -81,10 +83,19 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
         if (position <= post_threshold) {
             //get newer posts in the top
-            Log.d("PRVA", "should fetch top posts"); // todo add method calls
+            if (!hasGottenNewPosts) {
+                Log.d("PRVA", "should fetch top posts"); // todo add method calls
+                hasGottenNewPosts = true;
+            }
         } else if (position >= (total - post_threshold)) {
             // get older posts
-            Log.d("PRVA","should fetch more bottom posts");
+            if (!hasGottenNewPosts) {
+                Log.d("PRVA", "should fetch more bottom posts");
+                hasGottenNewPosts = true;
+            }
+        } else {
+            hasGottenNewPosts = false;
+            Log.d("PRVA","should not fetch more posts..");
         }
     }
 

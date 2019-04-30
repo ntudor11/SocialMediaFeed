@@ -43,7 +43,7 @@ public class NavigationBarFragment extends Fragment {
             Log.d("NF","ItemId: "+item.getItemId());
             Log.d("NF","feed ID: "+R.id.navigation_feed);
             Log.d("NF","post ID: "+R.id.navigation_makepost);
-            Log.d("NF","profile ID: "+R.id.navigation_account);
+            Log.d("NF","profile ID: "+R.id.navigation_account); //todo remove
             switch (item.getItemId()) {
                 case R.id.navigation_feed:
                     Log.d("NF","Feed");
