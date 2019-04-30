@@ -70,11 +70,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     @Override
     public void onBindViewHolder(GenericViewHolder holder, int position){
-
-        //todo add call here to methods that add new posts
-        Log.d("PRVA","bind holder at position: "+(position)+" of "+(getItemCount() - 1));
-        checkIfNeedToGetMorePosts(position,getItemCount());
-
         Post post = posts.get(position);
         holder.bind(post);
     }
@@ -82,37 +77,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     @Override
     public int getItemCount(){
         return posts.size();
-    }
-
-    private void checkIfNeedToGetMorePosts(int position, int total){
-        /*
-        if (getItemCount() < 6) {
-            feed.updateWithNewerPosts();
-            return;
-        }*/
-
-        int post_threshold = 1;
-
-        if (position <= post_threshold) {
-            //get newer posts in the top
-            if (!hasGottenNewPosts) {
-                Log.d("PRVA", "should fetch top posts"); // todo add method calls
-                feed.updateWithNewerPosts();
-                feedFragment.updateRecyclerView();
-                hasGottenNewPosts = true;
-            }
-        } else if (position >= (total - post_threshold)) {
-            // get older posts
-            if (!hasGottenNewPosts) {
-                Log.d("PRVA", "should fetch more bottom posts");
-                feed.updateWithOlderPosts();
-                feedFragment.updateRecyclerView();
-                hasGottenNewPosts = true;
-            }
-        } else {
-            hasGottenNewPosts = false;
-            Log.d("PRVA","should not fetch more posts..");
-        }
     }
 
     //      >>> VIEW HOLDERS <<<

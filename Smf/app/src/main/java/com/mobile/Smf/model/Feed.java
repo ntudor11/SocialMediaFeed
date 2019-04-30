@@ -48,11 +48,17 @@ public class Feed {
     }
 
     public void updateWithNewerPosts(){
-        feed_as_list = datainterface.getUpdatedListNewer();
+        List<Post> newItems = datainterface.getUpdatedListNewer();
+        if (newItems != null){
+            feed_as_list.addAll(0,newItems);
+        }
     }
 
     public void updateWithOlderPosts(){
-        feed_as_list = datainterface.getUpdatedListOlder();
+        List<Post> newItems = datainterface.getUpdatedListOlder();
+        if (newItems != null){
+            feed_as_list.addAll(newItems);
+        }
     }
 
 
