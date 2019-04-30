@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Callable;
+import android.util.Log;
 
 public class queryMySql implements Callable<ResultSet> {
 
@@ -24,7 +25,7 @@ public class queryMySql implements Callable<ResultSet> {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(DB_URL, user, pass);
-            System.out.println("Database connection success queryMySql");
+            Log.d("queryMySql", "Connection established");
 
             Statement st = con.createStatement();
 

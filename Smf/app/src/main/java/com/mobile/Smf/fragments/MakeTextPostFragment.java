@@ -42,7 +42,7 @@ public class MakeTextPostFragment extends Fragment {
         View makePostView = inflater.inflate(R.layout.fragment_maketextpost,container,false);
 
         postContentHolder = PostContentHolder.getPostContentHolderSingleton();
-        dataInterface = new DataInterface(getContext());
+        dataInterface = DataInterface.getDataInterface(getContext());
 
         textViewHeader = (TextView) makePostView.findViewById(R.id.maketextpost_textview_header);
         textViewNumChars = (TextView) makePostView.findViewById(R.id.maketextpost_textview_numchars);

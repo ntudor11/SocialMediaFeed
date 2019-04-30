@@ -1,10 +1,14 @@
 package com.mobile.Smf.database;
 
+import android.util.Log;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Callable;
+
+import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
 public class InsertMySql implements Callable<Boolean> {
 
@@ -22,9 +26,12 @@ public class InsertMySql implements Callable<Boolean> {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(DB_URL, user, pass);
-            System.out.println("Database connection success InsertMySql");
+
+            Log.d("InsertMySql", "Connection established");
 
             Statement st = con.createStatement();
+
+            Log.d("Insert -instruction", instruction);
 
             int eval = st.executeUpdate(instruction);
 

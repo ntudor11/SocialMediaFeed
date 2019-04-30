@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mobile.Smf.R;
+import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.activities.LoginActivity;
 import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.User;
@@ -45,7 +46,7 @@ public class SignUpFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View signupView = inflater.inflate(R.layout.fragment_signup, container, false);
 
-        dataInterface = new DataInterface(getContext());
+        dataInterface = DataInterface.getDataInterface(getContext());
 
         usernameTextView = (TextView) signupView.findViewById(R.id.signup_textview_username);
         usernameTextView.setText(R.string.signup_username);
@@ -80,6 +81,7 @@ public class SignUpFragment extends Fragment {
 
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
+            //todo make password characters * and reenter password to check
             @Override
             public void onClick(View view) {
                 String username = usernameEditText.getText().toString();
@@ -87,10 +89,26 @@ public class SignUpFragment extends Fragment {
                 String email = emailEditText.getText().toString();
                 int birthYear = Integer.parseInt(birthYearEditText.getText().toString());
 
-                if (dataInterface.checkIfValidNewUser(username,email)){
-                    User newUser = dataInterface.addNewUser(username,password,email,country,birthYear);
-                } else {
-                    Toast.makeText(getContext(), "Username and email are already taken.",Toast.LENGTH_SHORT).show();
+                //todo make check. is the email a valid email, is the user more then lets say 13 years etc.
+
+
+                //Below (isConnected) can only be tested live due to bug in emulator (does not see pc's connection)
+
+                if(!dataInterface.isConnected())
+                    Toast.makeText(getContext(), "You need internet connection to sign up",Toast.LENGTH_SHORT).show();
+                else {
+
+                    if (dataInterface.checkIfValidNewUser(username, email)) {
+
+                            if(dataInterface.addNewUser(username, password, email, country, birthYear)){
+                                Intent intent = new Intent(getContext(), FeedActivity.class);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(getContext(), "Error while syncing", Toast.LENGTH_SHORT).show();
+                            }
+                    } else {
+                        Toast.makeText(getContext(), "Username or email is already taken.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

@@ -10,11 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mobile.Smf.R;
+import com.mobile.Smf.fragments.FeedFragment;
+import com.mobile.Smf.model.Feed;
 import com.mobile.Smf.model.PicturePost;
 import com.mobile.Smf.model.Post;
 import com.mobile.Smf.model.TextPost;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -28,12 +28,18 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private static final int TYPE_TEXT_POST = 0;
     private static final int TYPE_PICTURE_POST = 1;
 
-    private boolean hasGottenNewPosts = false;
+    private Feed feed;
+
+    private boolean hasGottenNewPosts = true;
 
     private List<Post> posts;
 
-    public PostRecyclerViewAdapter(List<Post> newPosts){
+    private FeedFragment feedFragment;
+
+    public PostRecyclerViewAdapter(List<Post> newPosts, Context context, FeedFragment feedFragmentParam){
         posts = newPosts;
+        feed = Feed.getFeedSingleton(context);
+        feedFragment = feedFragmentParam;
     }
 
     public void updatePosts(List<Post> newPosts){
@@ -79,18 +85,28 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     }
 
     private void checkIfNeedToGetMorePosts(int position, int total){
-        int post_threshold = 3;
+        /*
+        if (getItemCount() < 6) {
+            feed.updateWithNewerPosts();
+            return;
+        }*/
+
+        int post_threshold = 1;
 
         if (position <= post_threshold) {
             //get newer posts in the top
             if (!hasGottenNewPosts) {
                 Log.d("PRVA", "should fetch top posts"); // todo add method calls
+                feed.updateWithNewerPosts();
+                feedFragment.updateRecyclerView();
                 hasGottenNewPosts = true;
             }
         } else if (position >= (total - post_threshold)) {
             // get older posts
             if (!hasGottenNewPosts) {
                 Log.d("PRVA", "should fetch more bottom posts");
+                feed.updateWithOlderPosts();
+                feedFragment.updateRecyclerView();
                 hasGottenNewPosts = true;
             }
         } else {
@@ -134,7 +150,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 return;
             }
             textViewUsername.setText(tPost.getUserName());
-            textViewTimestamp.setText(tPost.getTimeStampAsStr());
+            textViewTimestamp.setText(tPost.getUniversalTimeStamp());
             textViewText.setText(tPost.getText());
 
             like.setOnClickListener(new View.OnClickListener() {
@@ -179,7 +195,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 return;
             }
             textViewUsername.setText(pPost.getUserName());
-            textViewTimestamp.setText(pPost.getTimeStampAsStr());
+            textViewTimestamp.setText(pPost.getUniversalTimeStamp());
             imageViewPicture.setImageBitmap(pPost.getPicture());
 
             like.setOnClickListener(new View.OnClickListener() {

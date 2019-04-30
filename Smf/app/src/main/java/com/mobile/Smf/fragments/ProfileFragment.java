@@ -37,7 +37,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View profileView = inflater.inflate(R.layout.fragment_profile,container,false);
 
-        dataInterface = new DataInterface(getContext());
+        dataInterface = DataInterface.getDataInterface(getContext());
         user = dataInterface.getLoggedInUser();
 
         textViewUsernameDesc = profileView.findViewById(R.id.profile_textview_usernamedesc);
@@ -65,7 +65,9 @@ public class ProfileFragment extends Fragment {
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                dataInterface.checkSqLiteTables();
                 if (dataInterface.logCurrentUserOut()){
+                    dataInterface.checkSqLiteTables();
                     Toast.makeText(getContext(),"You have been logged out",Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getContext(), LoginActivity.class);
                     startActivity(intent);

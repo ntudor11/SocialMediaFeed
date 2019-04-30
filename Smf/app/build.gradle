@@ -1,6 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
+    compileOptions {
+        // change compatibility to Java 8 to get Java 8 IDE support
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.mobile.Smf"
