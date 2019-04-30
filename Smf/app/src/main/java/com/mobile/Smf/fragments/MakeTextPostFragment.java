@@ -90,6 +90,7 @@ public class MakeTextPostFragment extends Fragment {
                             // upload the new post and respond accordingly
                             if (dataInterface.uploadTextPost(text)) {
                                 // go back to feed after posting
+                                postContentHolder.clearData();
                                 Toast.makeText(getContext(), "Uploaded post!", Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(getContext(), FeedActivity.class);
                                 startActivity(intent);

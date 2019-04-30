@@ -4,13 +4,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-
-
 public class Timestamp {
-
-
-
-
     private int year;
     private int month;
     private int date;
@@ -28,7 +22,6 @@ public class Timestamp {
     GregorianCalendar local;
     GregorianCalendar universal;
 
-
     long systemTime;
     String localTime;
     String universalTime;
@@ -41,11 +34,7 @@ public class Timestamp {
         //printTest();
     }
 
-
-
-
     public void printTest() {
-
         System.out.println("Local Values:");
         System.out.println("Year "+localYear);
         System.out.println("Month "+localMonth);
@@ -65,9 +54,7 @@ public class Timestamp {
         System.out.println("System Time "+systemTime);
     }
 
-
     private void initialize(){
-
         //local & universal values (GMT Europe/London)
         localSec = local.get(Calendar.SECOND);
         sec = universal.get(Calendar.SECOND);
@@ -88,20 +75,20 @@ public class Timestamp {
     private void stringTimes() {
         String time = "";
         time += year;
-        time += month < 10 ? "header_bg"+month : month;;
-        time += date < 10 ? "header_bg"+date : date;
-        time += hour < 10 ? "header_bg"+hour : hour;
-        time += minute < 10 ? "header_bg"+minute : minute;
-        time += sec < 10 ? "header_bg"+sec : sec;
+        time += month < 10 ? "0"+month : month;;
+        time += date < 10 ? "0"+date : date;
+        time += hour < 10 ? "0"+hour : hour;
+        time += minute < 10 ? "0"+minute : minute;
+        time += sec < 10 ? "0"+sec : sec;
         universalTime = time;
 
         String lTime = "";
         lTime += localYear;
-        lTime += localMonth< 10 ? "header_bg"+localMonth : localMonth;
-        lTime += localDate < 10 ? "header_bg"+localDate : localDate;
-        lTime += localHour < 10 ? "header_bg"+localHour : localHour;
-        lTime += localMinute < 10 ? "header_bg"+localMinute : localMinute;
-        lTime += localSec < 10 ? "header_bg"+localSec : localSec;
+        lTime += localMonth< 10 ? "0"+localMonth : localMonth;
+        lTime += localDate < 10 ? "0"+localDate : localDate;
+        lTime += localHour < 10 ? "0"+localHour : localHour;
+        lTime += localMinute < 10 ? "0"+localMinute : localMinute;
+        lTime += localSec < 10 ? "0"+localSec : localSec;
         localTime = lTime;
     }
 
@@ -166,6 +153,5 @@ public class Timestamp {
     public int getLocalSec() {
         return localSec;
     }
-
-
+    
 }

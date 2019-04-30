@@ -98,13 +98,17 @@ public class MakePicturePostFragment extends Fragment {
         buttonUploadNewPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (imageToUploadAsBitmap == null){
+                    Toast.makeText(getContext(),"You must take a picture first",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (dataInterface.uploadPicturePost(imageToUploadAsBitmap)){
+                    postContentHolder.clearData();
                     Toast.makeText(getContext(),"Successfully posted image",Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getContext(), FeedActivity.class);
                     startActivity(intent);
-
                 } else {
-                    Toast.makeText(getContext(),"Failed to post icon_photos.",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(),"Failed to post picture.",Toast.LENGTH_LONG).show();
                 }
             }
         });

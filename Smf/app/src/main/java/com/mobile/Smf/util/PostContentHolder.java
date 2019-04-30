@@ -35,4 +35,9 @@ public class PostContentHolder {
         return picture;
     }
 
+    public static void clearData(){
+        picture = null;
+        text = "";
+    }
+
 }
