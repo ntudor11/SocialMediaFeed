@@ -19,7 +19,7 @@ import com.mobile.Smf.model.TextPost;
 import java.util.List;
 
 /*
-* Adapter for multiple types of Posts, inspired by Gilbert Christopher's implmentation found at:
+* Polymorphic adapter for multiple types of posts, inspired by Gilbert Christopher's implmentation found at:
 * https://medium.com/@gilbertchristopher/a-recyclerview-with-multiple-view-type-22619a5ad365
 * */
 
@@ -28,17 +28,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private static final int TYPE_TEXT_POST = 0;
     private static final int TYPE_PICTURE_POST = 1;
 
-    private boolean hasGottenNewPosts = true;
-
     private List<Post> posts;
 
     public PostRecyclerViewAdapter(List<Post> newPosts){
         posts = newPosts;
-    }
-
-    public void updatePosts(List<Post> newPosts){
-        posts = newPosts;
-        notifyDataSetChanged();
     }
 
     @Override

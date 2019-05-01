@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,7 +43,6 @@ public class MakePicturePostFragment extends Fragment {
 
     public static final int REQUEST_IMAGE_CAPTURE = 1;
     public static final int CAMERA_PERMISSION_GRANTED = 1;
-    private static final int SUCCESSFULLY_RETURNED_PICTURE = 1;
 
     private TextView textViewHeader;
     private ImageView imageViewPicture;
@@ -171,8 +169,6 @@ public class MakePicturePostFragment extends Fragment {
     }
 
     private Bitmap createBitmapFromFile(String filePath){
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inSampleSize = 1;
         Bitmap bitmap = BitmapFactory.decodeFile(filePath);
         return bitmap;
     }

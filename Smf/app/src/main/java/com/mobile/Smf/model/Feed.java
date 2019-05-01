@@ -23,7 +23,6 @@ public class Feed extends Observable {
         datainterface = DataInterface.getDataInterface(context);
         feed_as_list = new ArrayList<>();
          fillFeed();
-         //createSomeTestPosts();
     }
 
     public static Feed getFeedSingleton(Context context){

@@ -79,9 +79,7 @@ public class SignUpFragment extends Fragment {
             }
         });
 
-
         createAccountButton.setOnClickListener(new View.OnClickListener() {
-            //todo make password characters * and reenter password to check
             @Override
             public void onClick(View view) {
                 String username = usernameEditText.getText().toString();
@@ -93,7 +91,6 @@ public class SignUpFragment extends Fragment {
 
 
                 //Below (isConnected) can only be tested live due to bug in emulator (does not see pc's connection)
-
                 if(!dataInterface.isConnected())
                     Toast.makeText(getContext(), "You need internet connection to sign up",Toast.LENGTH_SHORT).show();
                 else {

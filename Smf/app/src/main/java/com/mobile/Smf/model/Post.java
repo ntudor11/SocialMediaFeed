@@ -20,7 +20,6 @@ public abstract class Post implements PostTypeInterface {
         this.universalTimeStamp = universalTime;
     }
 
-
     public int getPostID() {
         return postID;
     }

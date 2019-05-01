@@ -17,7 +17,6 @@ import com.mobile.Smf.R;
 import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.Feed;
-import com.mobile.Smf.model.User;
 import com.mobile.Smf.util.PostContentHolder;
 
 public class MakeTextPostFragment extends Fragment {
