@@ -55,6 +55,10 @@ public class FeedFragment extends Fragment implements Observer {
         postRecyclerViewAdapter = new PostRecyclerViewAdapter(feed.getFeedAsList());
         feedRecyclerView.setAdapter(postRecyclerViewAdapter);
 
+        /*
+        * Uses the excellent iverscroll decor implementation by 'EverythingMe'
+        * found @ https://github.com/EverythingMe/overscroll-decor
+        * */
         OverScrollDecoratorHelper.setUpOverScroll(feedRecyclerView, OverScrollDecoratorHelper.ORIENTATION_VERTICAL);
 
         IOverScrollDecor decor = OverScrollDecoratorHelper.setUpOverScroll(feedRecyclerView, OverScrollDecoratorHelper.ORIENTATION_VERTICAL);
