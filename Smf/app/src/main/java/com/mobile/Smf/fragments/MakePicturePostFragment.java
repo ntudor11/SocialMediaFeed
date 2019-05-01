@@ -27,7 +27,7 @@ import android.widget.Toast;
 import com.mobile.Smf.R;
 import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.database.DataInterface;
-import com.mobile.Smf.model.Feed; // todo remove
+import com.mobile.Smf.model.Feed;
 import com.mobile.Smf.util.PostContentHolder;
 
 import java.io.File;
@@ -88,7 +88,7 @@ public class MakePicturePostFragment extends Fragment {
         // get pictyure to display
         if (postContentHolder.getPicture() == null){
             // set a placeholder image
-            updatePreviewImageView(getPlaceHolderImage()); // todo add nicer placeholder
+            updatePreviewImageView(getPlaceHolderImage());
         } else {
             imageToUploadAsBitmap = postContentHolder.getPicture();
             updatePreviewImageView(imageToUploadAsBitmap);
