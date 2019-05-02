@@ -1,5 +1,6 @@
 package com.mobile.Smf.database;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -15,11 +16,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import android.graphics.Point;
 import android.util.Log;
 
 
@@ -31,6 +35,8 @@ public class MySql {
     private static final String user = "godtUserName";
     private static final String pass = "godtPassword";
     private static final String DB_URL = "jdbc:mysql://mydb.itu.dk/" + DB;
+
+    private boolean deBug = true;
 
     //Thread related
     private static ExecutorService service;
@@ -128,8 +134,7 @@ public class MySql {
                             "(SELECT countryID FROM Countries WHERE countryName = '%s'), %d);",
                             userName, password, email, country, birthYear)));
 
-
-            if ((boolean) f.get()) {
+            if ( f.get()) {
                 //will refactor this to a sql function later on
                 Future<ResultSet> fx = service.submit(new queryMySql(DB_URL, user, pass,
                         String.format(Locale.getDefault(), "SELECT userID FROM Users WHERE email = '%s' AND userName = '%s';", email, userName)));
@@ -150,17 +155,18 @@ public class MySql {
 
     // DEPRECATED
     public User getLoggedInUser(int userID) {
-        ResultSet rs;
+
         User newUser = null;
         try {
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, String.format(Locale.getDefault(),
                     "SELECT * FROM User WHERE userID = %d;", userID)));
 
-            rs = f.get();
+            ResultSet rs = f.get();
 
             rs.first();
-            newUser = new User(rs.getInt(1), rs.getString(2), rs.getString(3),
-                    rs.getString(4), rs.getString(5), rs.getInt(6));
+            if(rs.getInt(1) == userID)
+                newUser = new User(rs.getInt(1), rs.getString(2), rs.getString(3),
+                        rs.getString(4), rs.getString(5), rs.getInt(6));
 
         } catch (InterruptedException e) {e.printStackTrace(); }
           catch (ExecutionException ex) {ex.printStackTrace();}
@@ -177,15 +183,14 @@ public class MySql {
             String arg1 = String.format(Locale.getDefault(),"SELECT insertTextPost (%d,0,%d,'%s','%s','%s');"
                     ,userID, timestamp, postText,localTime,universalTime);
 
-
             Future<Boolean> fPosts = service.submit(new TransactionInsertMySql(null,DB_URL, user, pass,arg1));
 
             successfulTransaction = fPosts.get();
 
         }
         catch(RuntimeException e) {System.out.println(e.getMessage()); e.printStackTrace();}
-        catch(ExecutionException ex) {ex.printStackTrace(); System.out.println("1");}
-        catch(InterruptedException exc) {exc.printStackTrace();System.out.println("2");}
+        catch(ExecutionException ex) {ex.printStackTrace();}
+        catch(InterruptedException exc) {exc.printStackTrace();}
 
         return successfulTransaction;
     }
@@ -209,7 +214,6 @@ public class MySql {
 
             successfulTransaction = fPosts.get();
 
-
         }
         catch(RuntimeException e) {System.out.println(e.getMessage()); e.printStackTrace();}
         catch(ExecutionException ex) {ex.printStackTrace();}
@@ -219,47 +223,24 @@ public class MySql {
     }
 
 
-    public ArrayList<Post> getAllPosts() {
-        ArrayList<Post> returnList = new ArrayList<>();
 
-        try {
-            String arg = "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture " +
-                    "FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
-                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID ORDER BY p.tStamp DESC;";
 
-            Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass,arg));
-            ResultSet rs = f.get();
-
-            rs.first();
-
-            while(!rs.isAfterLast()) {
-                int eval = rs.getInt(1);
-                if(eval == 0) {
-                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7), rs.getString(6),rs.getString(5)));
-                } else if (eval == 1) {
-                    byte[] bytePic = rs.getBytes(8);
-                    Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),rs.getString(5)));
-                }
-
-                rs.next();
-            }
-
-        } catch(ExecutionException e) {e.printStackTrace();}
-        catch(InterruptedException ex) {ex.printStackTrace();}
-        catch (SQLException exc) {exc.printStackTrace(); }
-
-        return returnList;
-    }
-
-    public ArrayList<Post> getInitialPosts() {
+    public ArrayList<Post> getInitialPosts(int userID) {
         //Timestamp t = new Timestamp();
         ArrayList<Post> returnList = new ArrayList<>();
 
         try {
-            String arg = "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
-                    " FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
-                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID ORDER BY p.tStamp DESC LIMIT 10;";
+            String arg = String.format(Locale.getDefault(),"SELECT p.postType, p.postID, u.userName, p.tStamp, " +
+                    "p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture, l.likes, IF(p.postID IN " +
+                    "(SELECT postID FROM LikeRelationship WHERE LikeRelationship.postID = p.postID AND " +
+                    "LikeRelationship.userID = %d ), 1, 0) AS clicked FROM Posts p " +
+                    "INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
+                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID LEFT JOIN Likes l ON p.postID = l.postID " +
+                    "ORDER BY p.tStamp DESC LIMIT 10;",userID);
+            if (!deBug) {
+                //System.out.println("getInitialPosts -> "+arg);
+                //Log.d("getInitialPosts",arg);
+            }
 
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
             ResultSet rs = f.get();
@@ -272,12 +253,13 @@ public class MySql {
             while(!rs.isAfterLast()) {
                 int eval = rs.getInt(1);
                 if(eval == 0) {
-                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7), rs.getString(6),rs.getString(5)));
+                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7),
+                            rs.getString(6),rs.getString(5),rs.getInt(9),rs.getInt(10) != 0 ));
                 } else if (eval == 1) {
                     byte[] bytePic = rs.getBytes(8);
-                    System.out.println(Arrays.toString(bytePic));
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),rs.getString(5)));
+                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),
+                            rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
                 }
 
                 rs.next();
@@ -286,24 +268,39 @@ public class MySql {
         }catch(ExecutionException e) {e.printStackTrace();}
         catch(InterruptedException ex) {ex.printStackTrace();}
         catch (SQLException exc) {exc.printStackTrace(); }
+    // REMOVE WHEN CLEANING UP
+        System.out.println("POSTCHECK!!!!!!!");
 
+        if(deBug) {
+            for (Post p : returnList) {
+                if (p.getPostType() == 0) {
+                    System.out.println("id: " + p.getPostID() + " name: " + p.getUserName() + " TimeStamp: " + p.getTimeStamp() + " text: " + ((TextPost) p).getText()
+                            + " Likes: " + p.getlikes() + " isClicked: " + p.getClicked());
+                } else {
+                    System.out.println("id: " + p.getPostID() + " name: " + p.getUserName() + " TimeStamp: " + p.getTimeStamp() + " PicturePost "
+                            + " Likes: " + p.getlikes() + " isClicked: " + p.getClicked());
+                }
+            }
+        }
     return returnList;
 
     }
 
-    public ArrayList<Post> getSpecificNumberOfNewerPosts(int numberOfPosts, long timestamp) {
+    public ArrayList<Post> getSpecificNumberOfNewerPosts(int numberOfPosts, long timestamp, int userID) {
 
         ArrayList<Post> returnList = new ArrayList<>();
 
         try {
-            String arg =  String.format(Locale.getDefault(),"SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
-                    " FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
-                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID WHERE p.tStamp > %d ORDER BY p.tStamp DESC LIMIT %d;",timestamp, numberOfPosts);
+            String arg =  String.format(Locale.getDefault(),"SELECT p.postType, p.postID, u.userName, p.tStamp, " +
+                            "p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture IF(p.postID IN " +
+                            "(SELECT postID FROM LikeRelationship WHERE LikeRelationship.postID = p.postID AND " +
+                            "LikeRelationship.userID = %d ), 'true', 'false') AS clicked FROM Posts p " +
+                            "INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
+                            "LEFT JOIN PicturePosts pic ON p.postID = pic.postID LEFT JOIN Likes l ON p.postID = l.postID " +
+                            "WHERE p.tStamp > %d ORDER BY p.tStamp DESC LIMIT %d;",userID,timestamp,numberOfPosts);
 
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
             ResultSet rs = f.get();
-            //Log.d("SpecificNumfNewerPosts",""+rs);
-
 
             rs.first();
             if(rs.getRow() == 0)
@@ -312,11 +309,13 @@ public class MySql {
             while(!rs.isAfterLast()) {
                 int eval = rs.getInt(1);
                 if(eval == 0) {
-                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7), rs.getString(6),rs.getString(5)));
+                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7), rs.getString(6),
+                            rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
                 } else if (eval == 1) {
                     byte[] bytePic = rs.getBytes(8);
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),rs.getString(5)));
+                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),
+                            rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
                 }
 
                 rs.next();
@@ -329,19 +328,145 @@ public class MySql {
         return returnList;
     }
 
-    public ArrayList<Post> getSpecificNumberOfLowerPosts(int numberOfPosts, int oldestPostId) {
+    public ArrayList<Post> getSpecificNumberOfLowerPosts(int numberOfPosts, int oldestPostId, int userID) {
 
         ArrayList<Post> returnList = new ArrayList<>();
 
         try {
 
             String arg = String.format(Locale.getDefault(),
-            "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture " +
+            "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture, l.likes," +
+                    "IF(p.postID IN (SELECT postID FROM LikeRelationship  WHERE LikeRelationship.postID = %d AND LikeRelationship.userID = %d ) , true, false) AS clicked " +
                     "FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
-                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID WHERE p.tStamp < (SELECT tStamp FROM Posts WHERE postID = %d) ORDER BY p.tStamp DESC LIMIT %d;",
-                    oldestPostId,numberOfPosts);
+                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID " +
+                    "LEFT JOIN Likes l ON p.postID = l.postID " +
+                    "WHERE p.tStamp < (SELECT tStamp FROM Posts WHERE postID = %d) " +
+                    "ORDER BY p.tStamp DESC LIMIT %d;",
+                    oldestPostId,userID,oldestPostId,numberOfPosts);
 
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
+            ResultSet rs = f.get();
+
+            rs.first();
+
+            //Todo if it breaks change boolean to int in query and use 0 an 1 to evaluate
+            while(!rs.isAfterLast()) {
+                int eval = rs.getInt(1);
+                if(eval == 0) {
+                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7),
+                            rs.getString(6),rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
+                } else if (eval == 1) {
+                    byte[] bytePic = rs.getBytes(8);
+                    Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
+                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),
+                            rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
+                }
+
+                rs.next();
+            }
+
+        }catch(ExecutionException e) {e.printStackTrace();}
+        catch(InterruptedException ex) {ex.printStackTrace();}
+        catch (SQLException exc) {exc.printStackTrace(); }
+
+        return returnList;
+    }
+
+    /*
+     * Remember to do this in sqlite to
+     * */
+    @SuppressLint("DefaultLocale")
+    public boolean addLikes(List<Point> likedPosts, int userID) {
+        boolean returnVal = false;
+
+        String[] args = new String[(likedPosts.size()*2)+3];
+
+        //System.out.println("SIZE OF args = "+args.length);
+
+        args[0] = DB_URL;
+        args[1] = user;
+        args[2] = pass;
+
+        int j = 3;
+        for(int i = 0; i < likedPosts.size(); i++) {
+
+            args[j++] = String.format("UPDATE Likes SET likes = likes + %d WHERE postID = %d AND postID NOT IN " +
+                    "(SELECT postID FROM LikeRelationship WHERE postID = %d AND userID = %d);",
+                    likedPosts.get(i).x,likedPosts.get(i).y,likedPosts.get(i).y, userID);
+            args[j++] = String.format("INSERT IGNORE INTO LikeRelationship (postID, userID) VALUES (%d,%d);",likedPosts.get(i).y,userID);
+        }
+        if(deBug)
+            System.out.println("ARGUMENTS FROM MYSQL TO TRANSACTIONS : "+Arrays.toString(args));
+        try {
+            Future<Boolean> f = service.submit(new TransactionInsertMySql(null, args));
+
+            returnVal = f.get();
+
+        } catch (ExecutionException e) {e.printStackTrace();System.out.println("FAILS HERE");}
+        catch (InterruptedException ex) {ex.printStackTrace();}
+
+        return returnVal;
+    }
+
+    /*
+     * Remember to do this in sqlite to
+     * */
+    public List<Point> getLikes(List<Point> postIDsAtY) {
+
+        if(!deBug) {
+            System.out.println("getLikes -> LIST SIZE CHECK: "+postIDsAtY.isEmpty());
+            Log.d("getLikes","LIST SIZE CHECK: "+postIDsAtY.isEmpty());
+        }
+
+        List<Point> returnList = new ArrayList<>();
+
+        StringBuilder sb = new StringBuilder("(");
+        for(int i = 0; i < postIDsAtY.size()-1; i++) {
+            sb.append(postIDsAtY.get(i).y +",");
+        }
+        sb.append(postIDsAtY.get(postIDsAtY.size()-1).y +")");
+
+        if(!deBug) {
+            System.out.println("getLikes sb args -> "+sb.toString());
+            Log.d("getLikes",sb.toString());
+        }
+
+        String arg = String.format( "SELECT postID,likes FROM Likes WHERE postID IN %s;",sb.toString());
+
+        if(deBug)
+            System.out.println(arg);
+
+        try {
+            Future<ResultSet> f = service.submit(new queryMySql(DB_URL,user,pass,arg));
+            ResultSet rs = f.get();
+
+            rs.first();
+            while (!rs.isAfterLast()) {
+                returnList.add(new Point(rs.getInt(1),rs.getInt(2)));
+                rs.next();
+            }
+            //System.out.println("RETURNLIST: "+returnList.toString());
+        } catch (ExecutionException e) {e.printStackTrace();}
+        catch (InterruptedException ex) {ex.printStackTrace();}
+        catch (SQLException exc) {exc.printStackTrace();}
+
+        return returnList;
+    }
+
+
+
+    /*
+    * DEPRECATED METHODS
+    * */
+    public ArrayList<Post> getAllPosts() {
+        ArrayList<Post> returnList = new ArrayList<>();
+
+        try {         //THIS QUERY HAS NOT BEEN UPDATED WITH LIKED AND CLICKED BOOLEAN
+            String arg = "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture " +
+                    "FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
+                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID ORDER BY p.tStamp DESC;";
+
+            Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass,arg));
             ResultSet rs = f.get();
 
             rs.first();
@@ -349,17 +474,19 @@ public class MySql {
             while(!rs.isAfterLast()) {
                 int eval = rs.getInt(1);
                 if(eval == 0) {
-                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7), rs.getString(6),rs.getString(5)));
+                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7),
+                            rs.getString(6),rs.getString(5),rs.getInt(9),rs.getInt(10)!= 0));
                 } else if (eval == 1) {
                     byte[] bytePic = rs.getBytes(8);
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),rs.getString(5)));
+                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),
+                            rs.getString(5), rs.getInt(9),rs.getInt(10)!= 0));
                 }
 
                 rs.next();
             }
 
-        }catch(ExecutionException e) {e.printStackTrace();}
+        } catch(ExecutionException e) {e.printStackTrace();}
         catch(InterruptedException ex) {ex.printStackTrace();}
         catch (SQLException exc) {exc.printStackTrace(); }
 

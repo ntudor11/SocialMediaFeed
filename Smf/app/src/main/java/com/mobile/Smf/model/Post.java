@@ -9,15 +9,21 @@ public abstract class Post implements PostTypeInterface {
     private long timeStamp;
     private String localTimeStamp;
     private String universalTimeStamp;
+    private static int likes;
+    private boolean clicked;
+    private int updateVal = 0;
 
     public abstract int getPostType();
 
-    public Post(int postID, String userName, long timeStamp, String localTime, String universalTime){
+    //add likes to constructor of posts and subclasses
+    public Post(int postID, String userName, long timeStamp, String localTime, String universalTime, int likes, boolean clicked){
         this.postID = postID;
         this.userName = userName;
         this.timeStamp = timeStamp;
         this.localTimeStamp = localTime;
         this.universalTimeStamp = universalTime;
+        this.likes = likes;
+        this.clicked = clicked;
     }
 
 
@@ -25,16 +31,8 @@ public abstract class Post implements PostTypeInterface {
         return postID;
     }
 
-    public void setPostID(int postID) {
-        this.postID = postID;
-    }
-
     public String getUserName() {
         return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public long getTimeStamp() {
@@ -46,6 +44,30 @@ public abstract class Post implements PostTypeInterface {
     public String getUniversalTimeStamp() {
         return universalTimeStamp;
     }
+
+    public void likePost() {
+        if (!clicked) {
+            likes++;
+            updateVal++;
+            clicked = true;
+        }
+    }
+
+    public void unlikePost() {
+        if (clicked) {
+            likes--;
+            updateVal--;
+            clicked = false;
+        }
+    }
+
+    public int getlikes() {return likes;}
+
+    public void setLikes(int val){likes = val;}
+
+    public boolean getClicked() {return clicked;}
+
+    public int getUpdateVal() {return updateVal;}
 
     public String getFormattedUniversalTimestamp() {
         StringBuilder sb = new StringBuilder();

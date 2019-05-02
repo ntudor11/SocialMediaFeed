@@ -56,6 +56,6 @@
     <!--feed fragment-->
     <string name="not_liked">Not Liked Yet</string>
     <string name="liked">Liked</string>
-    <string name="likes_no">12</string>
+    <string name="likes_no">0</string>
 
 </resources>

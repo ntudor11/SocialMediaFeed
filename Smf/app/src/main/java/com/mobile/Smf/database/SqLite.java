@@ -99,6 +99,8 @@ public class SqLite extends SQLiteOpenHelper {
 
             mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PicturePostsSync (postID int NOT NULL, picture BLOB NOT NULL);");
 
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS LikeSync (postID int NOT NULL, likes int NOT NULL, clicked int NOT NULL);");
+
 
         } catch(SQLException e) {e.printStackTrace();}
     }
@@ -136,14 +138,13 @@ public class SqLite extends SQLiteOpenHelper {
 
             Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
 
-            print(res);
             if(!((res != null) && (res.getCount() > 0)))
                     return returnVal;
             res.moveToFirst();
             res.moveToFirst();
             returnVal = new User (res.getInt(0),res.getString(1),res.getString(2),res.getString(3),res.getString(4),res.getInt(5));
 
-        } catch (SQLException e) {e.printStackTrace();}
+            } catch (SQLException e) {e.printStackTrace();}
         return returnVal;
     }
 
@@ -183,17 +184,24 @@ public class SqLite extends SQLiteOpenHelper {
     // Deprecated - delete when sure it is not going to be used
     public boolean checkIfValidLogin(String userName, String password) {
 
-        Cursor cursor = mydatabase.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Profile_info';",null);
+            Cursor cursor = mydatabase.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Profile_info';", null);
 
-        cursor.moveToFirst();
-        if(cursor.getInt(0) == 0)
-            return false;
-        else {
-            Cursor cur = mydatabase.rawQuery("SELECT * FROM Profile_info;",null);
-            cur.moveToFirst();
-            if(!(cur.getString(1).equals(userName) || cur.getString(2).equals(password)))
+            cursor.moveToFirst();
+            if (cursor.getInt(0) == 0) {
+                cursor.close();
                 return false;
-        }
+            }
+            else {
+                cursor.close();
+                Cursor cur = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
+                cur.moveToFirst();
+                if (!(cur.getString(1).equals(userName) || cur.getString(2).equals(password))) {
+                    cur.close();
+                    return false;
+                }
+                cur.close();
+            }
+
         return true;
     }
 
@@ -231,11 +239,13 @@ public class SqLite extends SQLiteOpenHelper {
         String argPost = "INSERT INTO PostsSync (postID,postType,userName,tStamp,uniTime,locTime) VALUES (?,?,?,?,?,?);";
         String argTextPost = "INSERT INTO TextPostsSync (postID,postText) VALUES (?,?);";
         String argPicturePost = "INSERT INTO PicturePostsSync (postID, picture) VALUES (?,?);";
+        String argLikes = "INSERT INTO LikesSync (postID, likes) VALUES (?,?);";
         try {
             mydatabase.beginTransaction();
             SQLiteStatement stmtPost = mydatabase.compileStatement(argPost);
             SQLiteStatement stmtTextPost = mydatabase.compileStatement(argTextPost);
             SQLiteStatement stmtPicturePost = mydatabase.compileStatement(argPicturePost);
+            SQLiteStatement stmtLikes = mydatabase.compileStatement(argLikes);
 
             for(Post p : list) {
                 stmtPost.bindLong(1,p.getPostID());
@@ -246,6 +256,12 @@ public class SqLite extends SQLiteOpenHelper {
                 stmtPost.bindString(6,p.getLocalTimeStamp());
                 stmtPost.execute();
                 stmtPost.clearBindings();
+
+                stmtLikes.bindLong(1,p.getPostID());
+                stmtLikes.bindLong(2,p.getlikes());
+                stmtLikes.bindLong(3,p.getClicked() ? 1 : 0);
+                stmtLikes.execute();
+                stmtLikes.clearBindings();
 
                 if(p.getPostType() == 0) {
                     stmtTextPost.bindLong(1,p.getPostID());
@@ -287,21 +303,27 @@ public class SqLite extends SQLiteOpenHelper {
 
         try {
             Cursor c = mydatabase.rawQuery(String.format(Locale.getDefault(),
-                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.uniTime, p.locTime, t.postText, pic.picture" +
+                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.uniTime, p.locTime, t.postText," +
+                            " pic.picture, l.likes, l.clicked" +
                     " FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
-                    " LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp < %d ORDER BY p.tStamp DESC;",timeStamp),null);
+                    " LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID LEFT JOIN LikeSync l ON" +
+                    " p.postID = l.postID " +
+                    " WHERE p.tStamp < %d ORDER BY p.tStamp DESC;",timeStamp),null);
 
             c.moveToFirst();
             while(!c.isAfterLast()) {
                 if(c.getInt(0) == 0) {
-                        returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),c.getString(5)));
+                        returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),
+                                c.getString(5),c.getInt(8),c.getInt(9) != 0 ));
                 } else if(c.getInt(0) == 1){
                     byte[] bytePic = c.getBlob(7);
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),c.getString(5)));
+                    returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),
+                            c.getString(5),c.getInt(8),c.getInt(9) != 0 ));
                 }
                 c.moveToNext();
             }
+            c.close();
 
         } catch (Exception e) {e.printStackTrace();}
 
@@ -313,23 +335,27 @@ public class SqLite extends SQLiteOpenHelper {
 
         try {
             Cursor c = mydatabase.rawQuery(String.format(Locale.getDefault(),
-                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture" +
-                            " FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
-                            " LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID WHERE p.tStamp > %d ORDER BY p.tStamp DESC;",timeStamp),null);
-
-            print(c);
+                    "SELECT p.postType, p.postID, p.userName, p.tStamp, p.uniTime, p.locTime, t.postText," +
+                    " pic.picture, l.likes, l.clicked" +
+                    " FROM PostsSync p LEFT JOIN TextPostsSync t ON p.postID = t.postID" +
+                    " LEFT JOIN PicturePostsSync pic ON p.postID = pic.postID LEFT JOIN LikeSync l ON" +
+                    " p.postID = l.postID " +
+                    " WHERE p.tStamp > %d ORDER BY p.tStamp DESC;",timeStamp),null);
 
             c.moveToFirst();
             while(!c.isAfterLast()) {
                 if(c.getInt(0) == 0) {
-                    returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),c.getString(5)));
+                    returnList.add(new TextPost(c.getInt(1),c.getString(2),c.getLong(3),c.getString(6),c.getString(4),
+                            c.getString(5),c.getInt(8),c.getInt(9) != 0));
                 } else if(c.getInt(0) == 1){
                     byte[] bytePic = c.getBlob(6);
                     Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),c.getString(5)));
+                    returnList.add(new PicturePost(c.getInt(1),c.getString(2),c.getLong(3), pic, c.getString(4),
+                            c.getString(5),c.getInt(8),c.getInt(9) != 0));
                 }
                 c.moveToNext();
             }
+            c.close();
 
         } catch (Exception e) {e.printStackTrace();}
 
@@ -375,11 +401,12 @@ public class SqLite extends SQLiteOpenHelper {
         }
     }
 
+
+    //REMOVE
     public void checkTables() {
 
             Cursor c = mydatabase.rawQuery(
                     "SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';",null);
-
             c.moveToFirst();
             print(c);
     }

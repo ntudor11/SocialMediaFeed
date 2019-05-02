@@ -66,6 +66,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     public void onBindViewHolder(GenericViewHolder holder, int position){
         Post post = posts.get(position);
         holder.bind(post);
+
     }
 
     @Override
@@ -88,8 +89,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView textViewTimestamp;
         private TextView textViewText;
         private ImageView like;
-        private boolean isLiked;
         private TextView numberOfLikes;
+        private final ItemBinding binding;
 
         public TextPostViewHolder(View itemView){
             super(itemView);
@@ -98,7 +99,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewText = (TextView) itemView.findViewById(R.id.view_textpost_textview_text);
             like = (ImageView) itemView.findViewById(R.id.view_post_imageview_like_not);
             numberOfLikes = (TextView) itemView.findViewById(R.id.view_post_textview_numlikes);
-            isLiked = false;
         }
 
         @Override
@@ -110,17 +110,31 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewUsername.setText(tPost.getUserName());
             textViewTimestamp.setText(tPost.getUniversalTimeStamp());
             textViewText.setText(tPost.getText());
+            numberOfLikes.setText(""+tPost.getlikes());
+            if(tPost.getClicked())
+                like.setImageResource(R.drawable.liked);
+            else
+                like.setImageResource(R.drawable.liked_not);
 
             like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    isLiked = !isLiked;
 
-                    if (isLiked == true) {
+                    if (!tPost.getClicked()) {
                         like.setImageResource(R.drawable.liked);
-                        // TODO implement database count and increment no in view
+                        tPost.likePost();
+                        numberOfLikes.setText(""+(tPost.getlikes()));
+                        System.out.println("like.clicklist -> post with id: " + tPost.getPostID() + " and userName: "
+                                + tPost.getUserName() + " liked - number of likes = "+tPost.getlikes()+" updateVal = "+tPost.getUpdateVal()+" isClicked ="+tPost.getClicked());
+                        Log.d("like.clicklist", "post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() + " liked");
                     } else {
                         like.setImageResource(R.drawable.liked_not);
+                        tPost.unlikePost();
+                        numberOfLikes.setText(""+(tPost.getlikes()));
+                        System.out.println("UNlike.clicklist -> post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() +
+                                " liked- number of likes = "+tPost.getlikes()+" updateVal = "+tPost.getUpdateVal()+" isClicked ="+tPost.getClicked());
+                        Log.d("like.clicklist", "post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() + " UNliked");
+
                     }
                 }
             });
@@ -133,7 +147,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView textViewTimestamp;
         private ImageView imageViewPicture;
         private ImageView like;
-        private boolean isLiked;
         private TextView numberOfLikes;
 
         public PicturePostHolder(View itemView){
@@ -143,7 +156,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             imageViewPicture = (ImageView) itemView.findViewById(R.id.view_picturepost_imageview_picture);
             like = (ImageView) itemView.findViewById(R.id.view_post_imageview_like_not);
             numberOfLikes = (TextView) itemView.findViewById(R.id.view_post_textview_numlikes);
-            isLiked = false;
         }
 
         @Override
@@ -155,17 +167,31 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewUsername.setText(pPost.getUserName());
             textViewTimestamp.setText(pPost.getUniversalTimeStamp());
             imageViewPicture.setImageBitmap(pPost.getPicture());
+            numberOfLikes.setText(""+pPost.getlikes());
+            if(pPost.getClicked())
+                like.setImageResource(R.drawable.liked);
+            else
+                like.setImageResource(R.drawable.liked_not);
 
             like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    isLiked = !isLiked;
 
-                    if (isLiked) {
+                    if (!pPost.getClicked()) {
                         like.setImageResource(R.drawable.liked);
-                        // TODO implement database count and increment no in view
+                        pPost.likePost();
+                        numberOfLikes.setText(""+pPost.getlikes());
+
+                        System.out.println("like.clicklist -> post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
+                        Log.d("like.clicklist","post with id: "+pPost.getPostID()+" and userName: "+pPost.getUserName()+" liked");
                     } else {
                         like.setImageResource(R.drawable.liked_not);
+                        pPost.unlikePost();
+                        numberOfLikes.setText(""+pPost.getlikes());
+
+                        System.out.println("UNlike.clicklist -> post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
+                        Log.d("like.clicklist","post with id: "+pPost.getPostID()+" and userName: "+pPost.getUserName()+" UNliked");
+
                     }
                 }
             });

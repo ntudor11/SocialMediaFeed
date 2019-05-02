@@ -24,6 +24,7 @@ import com.mobile.Smf.activities.FeedActivity;
 import com.mobile.Smf.activities.MakePicturePostActivity;
 import com.mobile.Smf.activities.MakeTextPostActivity;
 import com.mobile.Smf.activities.ProfileActivity;
+import com.mobile.Smf.model.Feed;
 
 import android.support.v4.app.Fragment;
 

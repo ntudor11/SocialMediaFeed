@@ -6,12 +6,16 @@
 package com.mobile.Smf.model;
 
 import android.content.Context;
+import android.graphics.Point;
+import android.util.Log;
 
 import com.mobile.Smf.database.DataInterface;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
+
 
 public class Feed extends Observable {
 
@@ -19,11 +23,11 @@ public class Feed extends Observable {
     private DataInterface datainterface;
     private List<Post> feed_as_list;
 
+
     private Feed(Context context){
         datainterface = DataInterface.getDataInterface(context);
         feed_as_list = new ArrayList<>();
          fillFeed();
-         //createSomeTestPosts();
     }
 
     public static Feed getFeedSingleton(Context context){
@@ -55,11 +59,10 @@ public class Feed extends Observable {
         updateObservers();
     }
 
-    private void updateObservers(){
+    public void updateObservers(){
         this.setChanged();
         this.notifyObservers();
         this.clearChanged();
     }
-
 
 }

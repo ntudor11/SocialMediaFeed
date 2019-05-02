@@ -24,7 +24,7 @@ public class TransactionInsertMySql implements Callable<Boolean> {
     public TransactionInsertMySql(byte[] pic,String ... params) {
         this.pic = pic;
         this.params = params;
-
+        input = new PreparedStatement[params.length-3];
     }
 
 
@@ -36,29 +36,29 @@ public class TransactionInsertMySql implements Callable<Boolean> {
             Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection(params[0], params[1], params[2]);
 
-            input = new PreparedStatement[1];
-            input[0] = con.prepareStatement(params[3]);
-            if(pic != null) {
-                input[0].setBytes(1, pic);
-            }
-
-
             con.setAutoCommit(false);
 
             save1 = con.setSavepoint("save1");
 
             for (int i = 0; i < input.length; i++) {
+                input[i] = con.prepareStatement(params[i+3]);
                 input[i].execute();
+            }
+
+            if(pic != null) {
+                input[0].setBytes(1, pic);
             }
 
             con.commit();
 
-            //Log.d("TransactionInsertMySql", "Transation committed");
+            System.out.println("TransactionInsertMySql -> Transation committed");
+            Log.d("TransactionInsertMySql", "Transation committed");
 
             return true;
 
-            } catch (ClassNotFoundException exce) { exce.printStackTrace(); }
+            } catch (ClassNotFoundException exce) { exce.printStackTrace(); System.out.println("failed in ClassNotFoundException TMSql");}
               catch (SQLException ex) { ex.printStackTrace();
+                  System.out.println("failed in SQLException TMSql");
                     try {
                         con.rollback(save1);
                         return false;
@@ -78,7 +78,7 @@ public class TransactionInsertMySql implements Callable<Boolean> {
                     if(con != null)
                         con.close();
 
-                } catch (SQLException e) {e.printStackTrace();}
+                } catch (SQLException e) {e.printStackTrace(); System.out.println("failed in finally TMSql");}
         }
         return true;
     }

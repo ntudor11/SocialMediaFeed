@@ -11,8 +11,8 @@ public class PicturePost extends Post implements PostTypeInterface {
 
     private Bitmap picture;
 
-    public PicturePost(int postID, String userName, long timeStamp, Bitmap picture,String localTime, String universalTime){
-        super(postID,userName,timeStamp,localTime, universalTime);
+    public PicturePost(int postID, String userName, long timeStamp, Bitmap picture,String localTime, String universalTime, int likes, boolean clicked){
+        super(postID,userName,timeStamp,localTime, universalTime, likes, clicked);
         this.picture = picture;
     }
 

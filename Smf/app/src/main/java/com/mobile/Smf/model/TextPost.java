@@ -8,8 +8,8 @@ public class TextPost extends Post {
     private String text;
 
 
-    public TextPost(int postID, String userName, long timeStamp, String text, String localTime, String universalTime){
-        super(postID,userName,timeStamp,localTime, universalTime);
+    public TextPost(int postID, String userName, long timeStamp, String text, String localTime, String universalTime, int likes, boolean clicked){
+        super(postID,userName,timeStamp,localTime, universalTime, likes, clicked);
         this.text = text;
     }
 

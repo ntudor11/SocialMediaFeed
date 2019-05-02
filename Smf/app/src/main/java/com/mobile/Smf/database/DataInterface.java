@@ -7,6 +7,7 @@ package com.mobile.Smf.database;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
@@ -52,11 +53,6 @@ public class DataInterface {
         sqLite = SqLite.getSqLite(context);
         getUserFromCookie();
         setUpNetworkFields();
-        getInitialPosts();
-        backgroundSync = new AtomicBoolean(true);
-        scrollFlag = new AtomicBoolean(false);
-
-        startBackGroundSync();
     }
 
     public static DataInterface getDataInterface(Context context) {
@@ -65,16 +61,24 @@ public class DataInterface {
         return dataInterface;
     }
 
+
     private void getInitialPosts() {
         if(isConnected()) {
-            postsInUse = mySql.getInitialPosts();
-
+            postsInUse = mySql.getInitialPosts(user.getId());
         } else {
             //todo check sqlite for posts or throw exception
         }
+        backgroundSync = new AtomicBoolean(true);
+        scrollFlag = new AtomicBoolean(false);
+        startBackGroundSync();
     }
 
     public ArrayList<Post> getFirstTenPosts() {
+        Log.d("getFirstTenPosts","postInUse: "+postsInUse+" user: "+user);
+        System.out.println("getFirstTenPosts -> USER: "+user+" postsInUse "+ postsInUse);
+        if(postsInUse == null)
+            postsInUse = mySql.getInitialPosts(user.getId());
+        System.out.println("getFirstTenPosts post if -> USER: "+user+" postsInUse "+ postsInUse);
         return postsInUse;
     }
 
@@ -93,6 +97,7 @@ public class DataInterface {
         sqLite.setUpSchemas();
             if(mySql.checkIfValidLogin(userName, password)) {
                 User u = mySql.getUser(userName);
+                getInitialPosts();
                 if(sqLite.syncProfileInfoFromMySql(u)){
                     returnVal = true;
                 }
@@ -122,9 +127,10 @@ public class DataInterface {
     public boolean addNewUser(String userName, String password, String email, String country, int birthYear){
        boolean returnVal = false;
 
-        User user = mySql.addNewUser(userName,password,email,country,birthYear);
+        user = mySql.addNewUser(userName,password,email,country,birthYear);
         //Log.d("addNewUser",""+user);
         if(user != null)
+            getInitialPosts();
             if(sqLite.syncProfileInfoFromMySql(user))
                 returnVal = true;
 
@@ -141,35 +147,7 @@ public class DataInterface {
         return user ;
     }
 
-    private void updateLoggedInUser(){
-        user = sqLite.getLoggedInUser();
-    }
 
-    /*
-    * returns all posts, intended for development
-    * @return List<Post> list of all posts
-    * */
-    public List<Post> getAllPosts(){
-        return mySql.getAllPosts();
-    }
-
-    /*
-    * returns the specified number of new posts
-    * @param numberOfPosts int number of new posts to get
-    * @return List<Post> returns a list of posts to be prepended
-    * */
-    public List<Post> getSpecificNumberOfNewerPosts(int numberOfPosts, long timestamp){
-        return mySql.getSpecificNumberOfNewerPosts(numberOfPosts, timestamp);
-    }
-
-    /*
-    * returns the specified number of older and not loaded posts
-    * @param numberOfPosts int number of posts to get
-    * @return List<Post> returns a list of posts to be appended
-    * */
-    public List<Post> getSpecificNumberOfLowerPosts(int numberOfPosts, int oldestPostID){
-        return mySql.getSpecificNumberOfLowerPosts(numberOfPosts, oldestPostID);
-    }
 
     /*
     * uploads a new TextPost to MySql server.
@@ -188,7 +166,7 @@ public class DataInterface {
     * */
     public List<Post> getUpdatedListOlder() {
 
-        if(olderPosts.size() == 0)
+        if(olderPosts == null || olderPosts.size() == 0)
             return null;
 
         oldP.lock();
@@ -206,7 +184,7 @@ public class DataInterface {
      * */
     public List<Post> getUpdatedListNewer() {
 
-        if(newerPosts.size() == 0)
+        if(newerPosts == null || newerPosts.size() == 0)
             return null;
 
         newP.lock();
@@ -260,8 +238,8 @@ public class DataInterface {
         // maybe adjustments should be made to how many we read in to begin with and save in sqlite
         if(isConnected()) {
 
-            olderPosts = mySql.getSpecificNumberOfLowerPosts(10, postsInUse.get(postsInUse.size() - 1).getPostID());
-            newerPosts = mySql.getSpecificNumberOfNewerPosts(1,postsInUse.get(0).getTimeStamp());
+            olderPosts = mySql.getSpecificNumberOfLowerPosts(10, postsInUse.get(postsInUse.size() - 1).getPostID(),user.getId());
+            newerPosts = mySql.getSpecificNumberOfNewerPosts(1,postsInUse.get(0).getTimeStamp(),user.getId());
 
         }
 
@@ -271,18 +249,23 @@ public class DataInterface {
             while(backgroundSync.get()) {
                 //System.out.println("postInUse: "+postsInUse.size());
 
+                try {
+                    Thread.sleep(5000);
+                } catch(InterruptedException e) {e.printStackTrace();}
+
                 if(isConnected()) {
                     if (newerPosts.size() < 20) {
                         newP.lock();
-                        newerPosts.addAll(mySql.getSpecificNumberOfNewerPosts(1,newerPosts.size() != 0 ? newerPosts.get(newerPosts.size()-1).getTimeStamp() : postsInUse.get(0).getTimeStamp()));
+                        newerPosts.addAll(mySql.getSpecificNumberOfNewerPosts(1,
+                                newerPosts.size() != 0 ? newerPosts.get(newerPosts.size()-1).getTimeStamp() : postsInUse.get(0).getTimeStamp(),user.getId()));
                         //System.out.println("newerPosts size: "+newerPosts.size());
                         newP.unlock();
-
                     }
 
                     if (scrollFlag.get()) {
+                        System.out.println("Inside scrollFlag!!!!");
                         oldP.lock();
-                        olderPosts.addAll(mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID()));
+                        olderPosts.addAll(mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID(),user.getId()));
                         //System.out.println("olderPosts size: "+olderPosts.size());
                         oldP.unlock();
                         if (olderPosts.size() > 50) {
@@ -297,9 +280,7 @@ public class DataInterface {
                     }
                 }
 
-                try {
-                    Thread.sleep(5000);
-                } catch(InterruptedException e) {e.printStackTrace();}
+
 
                 if(newerPosts.size() > 25) {
                     newP.lock();
@@ -329,9 +310,58 @@ public class DataInterface {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    public boolean updateLikes(List<Point> likesToBeUpdated) {
+        if(isConnected())
+            return mySql.addLikes(likesToBeUpdated,user.getId());
+        else
+            return true; //sqlite implementation
+    }
+
+    public List<Point> getUpdatedLikes(List<Point> postIDsAtY) {
+        if(isConnected())
+            return mySql.getLikes(postIDsAtY);
+        else
+            return null; //make this from sqlite
+    }
+
     public void checkSqLiteTables(){
         System.out.println("checkSqLiteTables");
         sqLite.checkTables();
+    }
+
+    /*
+    * DEPRECATED METHODS
+    * */
+
+    /*
+     * returns all posts, intended for development
+     * @return List<Post> list of all posts
+     * */
+    public List<Post> getAllPosts(){
+        return mySql.getAllPosts();
+    }
+
+    private void updateLoggedInUser(){
+        user = sqLite.getLoggedInUser();
+    }
+
+
+    /*
+     * returns the specified number of new posts
+     * @param numberOfPosts int number of new posts to get
+     * @return List<Post> returns a list of posts to be prepended
+     * */
+    public List<Post> getSpecificNumberOfNewerPosts(int numberOfPosts, long timestamp){
+        return mySql.getSpecificNumberOfNewerPosts(numberOfPosts, timestamp,user.getId());
+    }
+
+    /*
+     * returns the specified number of older and not loaded posts
+     * @param numberOfPosts int number of posts to get
+     * @return List<Post> returns a list of posts to be appended
+     * */
+    public List<Post> getSpecificNumberOfLowerPosts(int numberOfPosts, int oldestPostID){
+        return mySql.getSpecificNumberOfLowerPosts(numberOfPosts, oldestPostID,user.getId());
     }
 
 } //end class
