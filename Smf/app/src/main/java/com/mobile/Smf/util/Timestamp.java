@@ -31,7 +31,6 @@ public class Timestamp {
         universal = new GregorianCalendar(TimeZone.getTimeZone("Europe/London"));
         systemTime = System.currentTimeMillis();
         initialize();
-        //printTest();
     }
 
     public void printTest() {
@@ -92,7 +91,7 @@ public class Timestamp {
         localTime = lTime;
     }
 
-    //Getter methods
+    /*  Getter methods  */
 
     public long getSystemTime() {
         return systemTime;

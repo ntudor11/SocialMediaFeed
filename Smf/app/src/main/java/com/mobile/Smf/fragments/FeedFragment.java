@@ -12,24 +12,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+
 import com.mobile.Smf.database.DataInterface;
 import com.mobile.Smf.model.Post;
+
 import com.mobile.Smf.util.PostRecyclerViewAdapter;
 import com.mobile.Smf.R;
 import com.mobile.Smf.model.Feed;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import me.everything.android.ui.overscroll.IOverScrollDecor;
+import me.everything.android.ui.overscroll.IOverScrollStateListener;
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
+
 import static com.mobile.Smf.model.Feed.getFeedSingleton;
+import static me.everything.android.ui.overscroll.IOverScrollState.STATE_BOUNCE_BACK;
+import static me.everything.android.ui.overscroll.IOverScrollState.STATE_DRAG_END_SIDE;
+import static me.everything.android.ui.overscroll.IOverScrollState.STATE_DRAG_START_SIDE;
+import static me.everything.android.ui.overscroll.IOverScrollState.STATE_IDLE;
 
 public class FeedFragment extends Fragment implements Observer {
-
-    private boolean debug = true;
 
     private Feed feed;
     private RecyclerView feedRecyclerView;
@@ -42,6 +52,8 @@ public class FeedFragment extends Fragment implements Observer {
     private boolean hasGottenOlderPosts = true;
     private boolean hasGottenNewerPosts = true;
     private AtomicBoolean likeFlag;
+    private boolean debug = true;
+
 
 
     @Override
@@ -81,6 +93,7 @@ public class FeedFragment extends Fragment implements Observer {
         postRecyclerViewAdapter = new PostRecyclerViewAdapter(feed.getFeedAsList());
         feedRecyclerView.setAdapter(postRecyclerViewAdapter);
 
+
         feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -118,23 +131,50 @@ public class FeedFragment extends Fragment implements Observer {
 
             }
         });
+
+
+
+        /*
+        * Uses the excellent iverscroll decor implementation by 'EverythingMe'
+        * found @ https://github.com/EverythingMe/overscroll-decor
+        * */
+        OverScrollDecoratorHelper.setUpOverScroll(feedRecyclerView, OverScrollDecoratorHelper.ORIENTATION_VERTICAL);
+
+        IOverScrollDecor decor = OverScrollDecoratorHelper.setUpOverScroll(feedRecyclerView, OverScrollDecoratorHelper.ORIENTATION_VERTICAL);
+        decor.setOverScrollStateListener(new IOverScrollStateListener() {
+                                             @Override
+                                             public void onOverScrollStateChange(IOverScrollDecor decor, int oldState, int newState) {
+                                                 switch (newState) {
+                                                     case STATE_IDLE:
+                                                         break;
+                                                     case STATE_DRAG_START_SIDE:
+                                                         getNewerPostsEvent();
+                                                         break;
+                                                     case STATE_DRAG_END_SIDE:
+                                                         getOlderPostsEvent();
+                                                         break;
+                                                     case STATE_BOUNCE_BACK:
+                                                         if (oldState == STATE_DRAG_START_SIDE) {
+                                                         } else {
+                                                         }
+                                                         break;
+                                                 }
+                                             }
+                                         });
+
     }
 
 
     private void getNewerPostsEvent(){
-        Toast.makeText(getContext(),"Getting newer posts...",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),"Looking for newer posts...",Toast.LENGTH_SHORT).show();
         feed.updateWithNewerPosts();
         postRecyclerViewAdapter.notifyDataSetChanged();
-//        feed.updateWithOlderPosts();
-//        postRecyclerViewAdapter.updatePosts(feed.getFeedAsList());
     }
 
     private void getOlderPostsEvent(){
-        Toast.makeText(getContext(),"Getting older posts...",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),"Looking for older posts...",Toast.LENGTH_SHORT).show();
         feed.updateWithOlderPosts();
         postRecyclerViewAdapter.notifyDataSetChanged();
-//        feed.updateWithOlderPosts();Toast.makeText(getContext(),"",Toast.LENGTH_LONG).show();
-//        postRecyclerViewAdapter.updatePosts(feed.getFeedAsList());
     }
 
     @Override

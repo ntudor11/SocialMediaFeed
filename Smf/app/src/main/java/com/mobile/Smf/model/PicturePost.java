@@ -6,7 +6,6 @@ import com.mobile.Smf.util.PostTypeInterface;
 
 public class PicturePost extends Post implements PostTypeInterface {
 
-
     private static final int postType = 1;
 
     private Bitmap picture;
@@ -19,7 +18,6 @@ public class PicturePost extends Post implements PostTypeInterface {
     public Bitmap getPicture(){
         return picture;
     }
-
 
     @Override
     public int getPostType(){return postType;}

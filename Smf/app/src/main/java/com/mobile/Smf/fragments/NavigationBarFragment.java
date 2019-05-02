@@ -41,22 +41,15 @@ public class NavigationBarFragment extends Fragment {
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            Log.d("NF","ItemId: "+item.getItemId());
-            Log.d("NF","feed ID: "+R.id.navigation_feed);
-            Log.d("NF","post ID: "+R.id.navigation_makepost);
-            Log.d("NF","profile ID: "+R.id.navigation_account); //todo remove
             switch (item.getItemId()) {
                 case R.id.navigation_feed:
-                    Log.d("NF","Feed");
                     Intent feedIntent = new Intent(getContext(), FeedActivity.class);
                     startActivity(feedIntent);
                     return true;
                 case R.id.navigation_makepost:
-                    Log.d("NF","Post");
                     makePostDialog(getContext(), navigation);
                     return true;
                 case R.id.navigation_account:
-                    Log.d("NF","Profile");
                     Intent accountIntent = new Intent(getContext(), ProfileActivity.class);
                     startActivity(accountIntent);
                     return true;
@@ -82,8 +75,6 @@ public class NavigationBarFragment extends Fragment {
     }
 
     public void makePostDialog(Context context, BottomNavigationView view) {
-
-
         //make the dialog
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.makepost_dialog);

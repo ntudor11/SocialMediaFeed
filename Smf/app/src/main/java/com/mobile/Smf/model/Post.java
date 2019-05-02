@@ -26,7 +26,6 @@ public abstract class Post implements PostTypeInterface {
         this.clicked = clicked;
     }
 
-
     public int getPostID() {
         return postID;
     }

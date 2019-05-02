@@ -19,8 +19,12 @@ import com.mobile.Smf.model.TextPost;
 import java.util.List;
 
 /*
-* Adapter for multiple types of Posts, inspired by Gilbert Christopher's implmentation found at:
+* Polymorphic adapter for multiple types of posts, inspired by Gilbert Christopher's implmentation found at:
 * https://medium.com/@gilbertchristopher/a-recyclerview-with-multiple-view-type-22619a5ad365
+* */
+
+/*
+* TODO, fix bug with binds overlapping with likes. most likely we need to call executePendingBindings() somewhere
 * */
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.GenericViewHolder> {
@@ -28,17 +32,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private static final int TYPE_TEXT_POST = 0;
     private static final int TYPE_PICTURE_POST = 1;
 
-    private boolean hasGottenNewPosts = true;
-
     private List<Post> posts;
 
     public PostRecyclerViewAdapter(List<Post> newPosts){
         posts = newPosts;
-    }
-
-    public void updatePosts(List<Post> newPosts){
-        posts = newPosts;
-        notifyDataSetChanged();
     }
 
     @Override
@@ -90,7 +87,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView textViewText;
         private ImageView like;
         private TextView numberOfLikes;
-        private final ItemBinding binding;
+
 
         public TextPostViewHolder(View itemView){
             super(itemView);
@@ -110,6 +107,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             textViewUsername.setText(tPost.getUserName());
             textViewTimestamp.setText(tPost.getUniversalTimeStamp());
             textViewText.setText(tPost.getText());
+            //this.numberOfLikes.setText(""+tPost.getlikes());
             numberOfLikes.setText(""+tPost.getlikes());
             if(tPost.getClicked())
                 like.setImageResource(R.drawable.liked);

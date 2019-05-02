@@ -18,7 +18,6 @@ public class User {
         this.birthYear = birthYear;
     }
 
-
     public String getBirthYearAsString(){
         return "" + birthYear;
     }
