@@ -13,7 +13,8 @@ DROP TABLE IF EXISTS Countries, Users, Posts, TextPosts, PicturePosts;
 CREATE TABLE Countries (
 countryID INT NOT NULL AUTO_INCREMENT,
 countryName VARCHAR(100) NOT NULL,
-PRIMARY KEY (countryID)
+PRIMARY KEY (countryID),
+UNIQUE (countryName)
 );
 
 CREATE TABLE Users (
@@ -33,9 +34,9 @@ CREATE TABLE Posts(
     postID INT NOT NULL AUTO_INCREMENT,
     userID INT NOT NULL,
     postType INT NOT NULL,
-    tStamp BIGINT UNSIGNED NOT NULL,
-    universalTimeStamps VARCHAR(14),
-    localTimeStamps VARCHAR(14),
+    tStamp BIGINT SIGNED NOT NULL,
+    universalTimeStamps VARCHAR(35),
+    localTimeStamps VARCHAR(35),
     FOREIGN KEY (userID) REFERENCES Users (userID) ON DELETE CASCADE,
     PRIMARY KEY (postID)
 );
@@ -46,12 +47,29 @@ CREATE TABLE TextPosts(
     FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE
 );
 
-<!-- might have to make default value for picture
+
 CREATE TABLE PicturePosts(
     postID INT NOT NULL,
     picture BLOB NOT NULL,
     FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE
 );
+
+CREATE TABLE Likes(
+    postID INT NOT NULL,
+    likes INT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE,
+    UNIQUE (postID)
+);
+
+CREATE TABLE LikeRelationship(
+    postID INT NOT NULL,
+    userID INT NOT NULL,
+    FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE,
+    FOREIGN KEY (userID) REFERENCES Users (userID) ON DELETE CASCADE,
+    UNIQUE (postID,userID)
+);
+
+
 
 
 INSERT INTO Countries (countryName) VALUES
@@ -96,21 +114,22 @@ FOR EACH ROW
 BEGIN
     IF NEW.postType = 0 THEN
         INSERT INTO TextPosts (postID) VALUES (NEW.postID);
+        INSERT INTO Likes (postID) VALUES (NEW.postID);
     ELSE
         INSERT INTO PicturePosts (postID) VALUES (NEW.postID);
+        INSERT INTO Likes (postID) VALUES (NEW.postID);
 	END IF;
 END $$
 DELIMITER;
-
 
 DELIMITER $$$
 CREATE FUNCTION insertTextPost(
   inUserID INT,
   type INT,
-  intStamp BIGINT UNSIGNED,
+  intStamp BIGINT SIGNED,
   inPostText VARCHAR(145),
-  inUniversalTimeStamp VARCHAR(14),
-  inLocalTimeStamp VARCHAR(14)
+  inUniversalTimeStamp VARCHAR(35),
+  inLocalTimeStamp VARCHAR(35)
 )
 RETURNS BOOLEAN
 DETERMINISTIC
@@ -129,11 +148,11 @@ DELIMITER;
 DELIMITER //
 CREATE FUNCTION insertPicturePost(
   inUserID INT,
-  type BLOB,
-  intStamp BIGINT UNSIGNED,
-  inPicture int,
-  inLocalTimeStamp VARCHAR(14),
-  inUniversalTimeStamp VARCHAR(14)
+  type INT,
+  intStamp BIGINT SIGNED,
+  inPicture BLOB,
+  inLocalTimeStamp VARCHAR(35),
+  inUniversalTimeStamp VARCHAR(35)
 )
 RETURNS BOOLEAN
 DETERMINISTIC
@@ -148,3 +167,4 @@ BEGIN
   RETURN returnVal;
 END //
 DELIMITER;
+
