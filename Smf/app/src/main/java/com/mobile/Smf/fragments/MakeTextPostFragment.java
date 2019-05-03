@@ -1,6 +1,7 @@
 package com.mobile.Smf.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -25,12 +26,13 @@ public class MakeTextPostFragment extends Fragment {
 
     private TextView textViewHeader;
     private TextView textViewNumChars;
+    private TextView textViewCarsAllowed;
     private EditText editTextInputText;
     private Button buttonUploadNewPost;
 
     private DataInterface dataInterface;
 
-    private int maxNumberOfCharsAllowed = 145; // one better than twitter!
+    final private int maxNumberOfCharsAllowed = 145; // one better than twitter!
 
     private Feed feed;
 
@@ -49,6 +51,7 @@ public class MakeTextPostFragment extends Fragment {
 
         textViewHeader = (TextView) makePostView.findViewById(R.id.maketextpost_textview_header);
         textViewNumChars = (TextView) makePostView.findViewById(R.id.maketextpost_textview_numchars);
+        textViewCarsAllowed = (TextView) makePostView.findViewById(R.id.maketextpost_textview_allowed_length);
         editTextInputText = (EditText) makePostView.findViewById(R.id.maketextpost_edittext_text);
         buttonUploadNewPost = (Button) makePostView.findViewById(R.id.maketextpost_button_uploadnewpostbutton);
 
@@ -59,8 +62,9 @@ public class MakeTextPostFragment extends Fragment {
         }
 
         textViewHeader.setText(R.string.maketextpost_header);
-        buttonUploadNewPost.setText(R.string.maketextpost_uploadbutton);
 
+        buttonUploadNewPost.setText(R.string.maketextpost_uploadbutton);
+        textViewCarsAllowed.setText(" /" + maxNumberOfCharsAllowed + " characters.");
         updateNumberOfCharsWrittenTextView();
 
         editTextInputText.addTextChangedListener(new TextWatcher() {
@@ -110,6 +114,7 @@ public class MakeTextPostFragment extends Fragment {
     }
 
     private void updateNumberOfCharsWrittenTextView(){
-        textViewNumChars.setText(editTextInputText.length() + " /" + maxNumberOfCharsAllowed + " characters.");
+        textViewNumChars.setText(""+editTextInputText.length());
+        textViewNumChars.setTextColor(editTextInputText.getText().length() >= maxNumberOfCharsAllowed ? Color.RED : Color.BLACK);
     }
 }
