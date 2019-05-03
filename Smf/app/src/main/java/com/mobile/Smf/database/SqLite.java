@@ -139,7 +139,7 @@ public class SqLite extends SQLiteOpenHelper {
         try {
             Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
 
-            if (((res == null) && (res.getCount() == 0))) {
+            if (((res == null) || (res.getCount() == 0))) {
                 System.out.println("sqlite returning null");
                 return returnVal;
             }
