@@ -65,7 +65,9 @@ public class ProfileFragment extends Fragment {
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dataInterface.checkSqLiteTables();
+                dataInterface.killBackgroundSync();
+                dataInterface.setScrollFlag();
+                dataInterface.interruptBackgroundThread();
                 if (dataInterface.logCurrentUserOut()){
                     dataInterface.checkSqLiteTables();
                     Toast.makeText(getContext(),"You have been logged out",Toast.LENGTH_SHORT).show();

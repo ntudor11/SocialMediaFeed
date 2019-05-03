@@ -7,15 +7,17 @@ public class User {
     private String password;
     private String email;
     private String country;
+    private int countryID;
     private int birthYear;
 
-    public User(int id, String userName, String password, String email, String country, int birthYear){
+    public User(int id,String userName,String password,String email,String country,int birthYear,int countryID ){
         this.id = id;
         this.userName = userName;
         this.password = password;
         this.email = email;
         this.country = country;
         this.birthYear = birthYear;
+        this.countryID = countryID;
     }
 
     public String getBirthYearAsString(){
@@ -45,5 +47,7 @@ public class User {
     public String getEmail() {
         return email;
     }
+
+    public int getCountryID() {return countryID;}
 
 }

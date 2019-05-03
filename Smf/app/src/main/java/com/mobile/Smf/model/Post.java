@@ -72,10 +72,10 @@ public abstract class Post implements PostTypeInterface {
         StringBuilder sb = new StringBuilder();
         sb.append(universalTimeStamp.substring(0,4)+"-");
         sb.append(universalTimeStamp.substring(4,6)+"/");
-        sb.append(universalTimeStamp.substring(6,8)+"/ - ");
-        sb.append(universalTimeStamp.substring(universalTimeStamp.indexOf(8) != '0' ? 8 : 9, 10)+" h - ");
-        sb.append(universalTimeStamp.substring(universalTimeStamp.indexOf(10) != '0' ? 10 : 11, 12)+" m - ");
-        sb.append(universalTimeStamp.substring(universalTimeStamp.indexOf(12) != '0' ? 12 : 13, 14)+" s");
+        sb.append(universalTimeStamp.substring(6,8)+"\n ");
+        sb.append(universalTimeStamp.substring(universalTimeStamp.indexOf(8) != '0' ? 8 : 9, 10)+"-");
+        sb.append(universalTimeStamp.substring(universalTimeStamp.indexOf(10) != '0' ? 10 : 11, 12)+"-");
+        sb.append(universalTimeStamp.substring(universalTimeStamp.indexOf(12) != '0' ? 12 : 13, 14)+"");
         return sb.toString();
     }
 

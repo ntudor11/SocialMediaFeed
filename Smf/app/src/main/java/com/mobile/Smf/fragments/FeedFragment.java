@@ -52,7 +52,7 @@ public class FeedFragment extends Fragment implements Observer {
     private boolean hasGottenOlderPosts = true;
     private boolean hasGottenNewerPosts = true;
     private AtomicBoolean likeFlag;
-    private boolean debug = true;
+    private boolean debug = false;
 
 
 
@@ -124,7 +124,7 @@ public class FeedFragment extends Fragment implements Observer {
                     hasGottenOlderPosts = false;
                     hasGottenNewerPosts = false;
                 }
-                if (!debug){
+                if (debug){
                     Log.d("FeedFragment", "onScrolled dx: " + dx + " dy: " + dy);
                     Log.d("FeedFragment", "ScrollPosition " + scrollPosition + " / " + maxScrollPosition);
                 }
@@ -198,16 +198,11 @@ public class FeedFragment extends Fragment implements Observer {
                 while(likeFlag.get()) {
 
                     try{
-                        Thread.sleep(120000);
+                        Thread.sleep(5000);
                     } catch(InterruptedException e) {e.printStackTrace();}
 
                     List<Post> copiedList = ((List<Post>) ((ArrayList) feed.getFeedAsList()).clone());
                     List<Point> valuesToUpdate = new ArrayList<>();
-
-                    if(!debug) {
-                        System.out.println("original list: " + Arrays.toString(feed.getFeedAsList().toArray()));
-                        System.out.println("copied list: " + Arrays.toString(copiedList.toArray()));
-                    }
 
                     for(Post p : copiedList) {
                         if(p.getUpdateVal() != 0)
@@ -222,7 +217,7 @@ public class FeedFragment extends Fragment implements Observer {
                             Log.d("likeUpdater","likes committed to database");
 
                     try{
-                        Thread.sleep(10000);
+                        Thread.sleep(2000);
                     } catch(InterruptedException e) {e.printStackTrace();}
 
                     List<Point> updatedLikes;

@@ -34,6 +34,7 @@ public class DataInterface {
     private List<Post> olderPosts;
 
     // Background synchronization control elements
+    private Thread backgroundThread;
     private AtomicBoolean backgroundSync;
     private AtomicBoolean scrollFlag;
     private ReentrantLock inUse = new ReentrantLock();
@@ -51,7 +52,6 @@ public class DataInterface {
         this.context = context;
         mySql = MySql.getMySql();
         sqLite = SqLite.getSqLite(context);
-        getUserFromCookie();
         setUpNetworkFields();
     }
 
@@ -62,28 +62,13 @@ public class DataInterface {
     }
 
 
-    private void getInitialPosts() {
-        if(isConnected()) {
-            postsInUse = mySql.getInitialPosts(user.getId());
-        } else {
-            //todo check sqlite for posts or throw exception
+    public User getUserFromCookie() {
+        User u = sqLite.getLoggedInUser();
+        if(u != null) {
+            user = u;
+            getInitialPosts();
         }
-        backgroundSync = new AtomicBoolean(true);
-        scrollFlag = new AtomicBoolean(false);
-        startBackGroundSync();
-    }
-
-    public ArrayList<Post> getFirstTenPosts() {
-        Log.d("getFirstTenPosts","postInUse: "+postsInUse+" user: "+user);
-        System.out.println("getFirstTenPosts -> USER: "+user+" postsInUse "+ postsInUse);
-        if(postsInUse == null)
-            postsInUse = mySql.getInitialPosts(user.getId());
-        System.out.println("getFirstTenPosts post if -> USER: "+user+" postsInUse "+ postsInUse);
-        return postsInUse;
-    }
-
-    private void getUserFromCookie() {
-        user = sqLite.getLoggedInUser();
+        return u;
     }
 
     /*
@@ -97,9 +82,12 @@ public class DataInterface {
         sqLite.setUpSchemas();
             if(mySql.checkIfValidLogin(userName, password)) {
                 User u = mySql.getUser(userName);
-                getInitialPosts();
-                if(sqLite.syncProfileInfoFromMySql(u)){
-                    returnVal = true;
+                if(u != null) {
+                    user = u;
+                    getInitialPosts();
+                    if (sqLite.syncProfileInfoFromMySql(u)) {
+                        returnVal = true;
+                    }
                 }
             }
         return returnVal;
@@ -128,11 +116,12 @@ public class DataInterface {
        boolean returnVal = false;
 
         user = mySql.addNewUser(userName,password,email,country,birthYear);
-        //Log.d("addNewUser",""+user);
-        if(user != null)
+
+        if(user != null) {
             getInitialPosts();
-            if(sqLite.syncProfileInfoFromMySql(user))
+            if (sqLite.syncProfileInfoFromMySql(user))
                 returnVal = true;
+        }
 
         return returnVal;
     }
@@ -143,11 +132,30 @@ public class DataInterface {
     * */
 
     public User getLoggedInUser(){
-        user = sqLite.getLoggedInUser();
         return user ;
     }
 
 
+    // -- Post Related methods --
+
+    private void getInitialPosts() {
+        if(isConnected()) {
+            postsInUse = mySql.getInitialPosts(user.getId());
+        }
+        /*else {
+            //todo check sqlite for posts or throw exception
+        }
+        */
+        backgroundSync = new AtomicBoolean(true);
+        scrollFlag = new AtomicBoolean(false);
+        startBackGroundSync();
+    }
+
+    public ArrayList<Post> getFirstTenPosts() {
+        if(postsInUse == null)
+            postsInUse = mySql.getInitialPosts(user.getId());
+        return postsInUse;
+    }
 
     /*
     * uploads a new TextPost to MySql server.
@@ -157,7 +165,6 @@ public class DataInterface {
     * */
     public boolean uploadTextPost(String text){
         Timestamp t = new Timestamp();
-        Log.d("uploadTextPost", "UserName"+user.getUserName()+" userID "+user.getId());
         return mySql.uploadTextPost(user.getId(), text, t.getSystemTime(), t.getLocalTime(), t.getUniversalTime());
     }
 
@@ -225,9 +232,9 @@ public class DataInterface {
         backgroundSync.getAndSet(false);
     }
 
+
     public void setScrollFlag() {
         scrollFlag.getAndSet(true);
-        System.out.println("SETTING FLAG!!!");
     }
 
 
@@ -237,33 +244,28 @@ public class DataInterface {
         // read values into sqLite when local list gets to long --> do this tomorrow
         // maybe adjustments should be made to how many we read in to begin with and save in sqlite
         if(isConnected()) {
-
             olderPosts = mySql.getSpecificNumberOfLowerPosts(10, postsInUse.get(postsInUse.size() - 1).getPostID(),user.getId());
             newerPosts = mySql.getSpecificNumberOfNewerPosts(1,postsInUse.get(0).getTimeStamp(),user.getId());
-
         }
 
-        Thread backgroundThread = new Thread(() -> {
+        backgroundThread = new Thread(() -> {
 
 
             while(backgroundSync.get()) {
-                //System.out.println("postInUse: "+postsInUse.size());
 
                 try {
                     Thread.sleep(5000);
-                } catch(InterruptedException e) {e.printStackTrace();}
+                } catch(InterruptedException e) {return;}
 
                 if(isConnected()) {
                     if (newerPosts.size() < 20) {
                         newP.lock();
-                        newerPosts.addAll(mySql.getSpecificNumberOfNewerPosts(1,
+                        newerPosts.addAll(mySql.getSpecificNumberOfNewerPosts(10,
                                 newerPosts.size() != 0 ? newerPosts.get(newerPosts.size()-1).getTimeStamp() : postsInUse.get(0).getTimeStamp(),user.getId()));
-                        //System.out.println("newerPosts size: "+newerPosts.size());
                         newP.unlock();
                     }
 
                     if (scrollFlag.get()) {
-                        System.out.println("Inside scrollFlag!!!!");
                         oldP.lock();
                         olderPosts.addAll(mySql.getSpecificNumberOfLowerPosts(20, postsInUse.get(postsInUse.size() - 1).getPostID(),user.getId()));
                         //System.out.println("olderPosts size: "+olderPosts.size());
@@ -296,6 +298,10 @@ public class DataInterface {
 
     }
 
+    public void interruptBackgroundThread() {
+        backgroundThread.interrupt();
+    }
+
     private void setUpNetworkFields() {
 
         if(connectivityManager == null) {
@@ -323,6 +329,7 @@ public class DataInterface {
         else
             return null; //make this from sqlite
     }
+
 
     public void checkSqLiteTables(){
         System.out.println("checkSqLiteTables");

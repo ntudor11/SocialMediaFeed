@@ -90,7 +90,7 @@ public class SqLite extends SQLiteOpenHelper {
 
             mydatabase.execSQL("CREATE TABLE IF NOT EXISTS Profile_info (id int, name VARCHAR(100) NOT NULL, " +
                     "password VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, " +
-                    "country VARCHAR(100), birthYear int );");
+                    "country VARCHAR(100), birthYear int, countryID int );");
 
             mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PostsSync (postID int NOT NULL, postType int NOT NULL," +
                     "userName VARCHAR(100), tStamp INTEGER NOT NULL, uniTime VARCHAR(14), locTime VARCHAR(14));");
@@ -99,7 +99,7 @@ public class SqLite extends SQLiteOpenHelper {
 
             mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PicturePostsSync (postID int NOT NULL, picture BLOB NOT NULL);");
 
-            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS LikeSync (postID int NOT NULL, likes int NOT NULL, clicked int NOT NULL);");
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS LikesSync (postID int NOT NULL, likes int NOT NULL, clicked int NOT NULL);");
 
 
         } catch(SQLException e) {e.printStackTrace();}
@@ -123,6 +123,7 @@ public class SqLite extends SQLiteOpenHelper {
             contentValues.put("email", user.getEmail());
             contentValues.put("country", user.getCountry());
             contentValues.put("birthYear", user.getBirthYear());
+            contentValues.put("countryID", user.getCountryID());
 
             long eval = mydatabase.insert("Profile_info", null, contentValues);
                 if(eval != -1) {
@@ -134,30 +135,25 @@ public class SqLite extends SQLiteOpenHelper {
 
     public User getLoggedInUser() {
         User returnVal = null;
-        try {
 
+        try {
             Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
 
-            if(!((res != null) && (res.getCount() > 0)))
-                    return returnVal;
+            if (!((res != null) && (res.getCount() > 0))) {
+                System.out.println("sqlite returning null");
+                return returnVal;
+            }
+
             res.moveToFirst();
-            res.moveToFirst();
-            returnVal = new User (res.getInt(0),res.getString(1),res.getString(2),res.getString(3),res.getString(4),res.getInt(5));
+            returnVal = new User(res.getInt(0), res.getString(1), res.getString(2),
+                    res.getString(3), res.getString(4), res.getInt(5),res.getInt(6));
 
             } catch (SQLException e) {e.printStackTrace();}
+
         return returnVal;
     }
 
-    //could also be made to return a list
-    public Cursor getProfileInfo(String email, String name) {
-        Cursor res = null;
-        try {
-            res = mydatabase.rawQuery(String.format("SELECT * FROM Profile_info WHERE email = '%s' " +
-                    "AND name ='%s';", email, name), null);
 
-        } catch (SQLException e) {e.printStackTrace();}
-        return res;
-    }
 
     public String getUserName() {
 
@@ -179,30 +175,6 @@ public class SqLite extends SQLiteOpenHelper {
 
         } catch (SQLException e) {e.printStackTrace();}
         return userID;
-    }
-
-    // Deprecated - delete when sure it is not going to be used
-    public boolean checkIfValidLogin(String userName, String password) {
-
-            Cursor cursor = mydatabase.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Profile_info';", null);
-
-            cursor.moveToFirst();
-            if (cursor.getInt(0) == 0) {
-                cursor.close();
-                return false;
-            }
-            else {
-                cursor.close();
-                Cursor cur = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
-                cur.moveToFirst();
-                if (!(cur.getString(1).equals(userName) || cur.getString(2).equals(password))) {
-                    cur.close();
-                    return false;
-                }
-                cur.close();
-            }
-
-        return true;
     }
 
 
@@ -362,7 +334,31 @@ public class SqLite extends SQLiteOpenHelper {
         return returnList;
     }
 
-    //helper methods
+    // Deprecated - delete when sure it is not going to be used
+    public boolean checkIfValidLogin(String userName, String password) {
+
+        Cursor cursor = mydatabase.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Profile_info';", null);
+
+        cursor.moveToFirst();
+        if (cursor.getInt(0) == 0) {
+            cursor.close();
+            return false;
+        }
+        else {
+            cursor.close();
+            Cursor cur = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
+            cur.moveToFirst();
+            if (!(cur.getString(1).equals(userName) || cur.getString(2).equals(password))) {
+                cur.close();
+                return false;
+            }
+            cur.close();
+        }
+
+        return true;
+    }
+
+    // Helper methods
 
     private void print(Cursor c) {
         System.out.println("PRINTCHECK");
@@ -410,6 +406,7 @@ public class SqLite extends SQLiteOpenHelper {
             c.moveToFirst();
             print(c);
     }
+
 
 }
 

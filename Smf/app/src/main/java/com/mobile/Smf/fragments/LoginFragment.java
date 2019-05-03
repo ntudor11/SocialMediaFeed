@@ -37,7 +37,7 @@ public class LoginFragment extends Fragment {
 
         dataInterface = DataInterface.getDataInterface(getContext());
 
-        User user = dataInterface.getLoggedInUser();
+        User user = dataInterface.getUserFromCookie();
         if(user != null) {
             // make this screen size dependent
             Toast toast = Toast.makeText(getContext(),"Logged in as "+user.getUserName(), Toast.LENGTH_LONG);

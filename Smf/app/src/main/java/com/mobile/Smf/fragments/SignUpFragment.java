@@ -98,6 +98,7 @@ public class SignUpFragment extends Fragment {
                     if (dataInterface.checkIfValidNewUser(username, email)) {
 
                             if(dataInterface.addNewUser(username, password, email, country, birthYear)){
+                                Toast.makeText(getContext(), "Welcome to SMF "+username,Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(getContext(), FeedActivity.class);
                                 startActivity(intent);
                             } else {

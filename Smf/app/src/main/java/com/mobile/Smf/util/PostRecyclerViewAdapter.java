@@ -82,6 +82,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     public static class TextPostViewHolder extends GenericViewHolder<TextPost> {
 
+        private boolean deBug = true;
+
         private TextView textViewUsername;
         private TextView textViewTimestamp;
         private TextView textViewText;
@@ -105,9 +107,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 return;
             }
             textViewUsername.setText(tPost.getUserName());
-            textViewTimestamp.setText(tPost.getUniversalTimeStamp());
+            textViewTimestamp.setText(tPost.getFormattedUniversalTimestamp());
             textViewText.setText(tPost.getText());
-            //this.numberOfLikes.setText(""+tPost.getlikes());
             numberOfLikes.setText(""+tPost.getlikes());
             if(tPost.getClicked())
                 like.setImageResource(R.drawable.liked);
@@ -122,16 +123,21 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                         like.setImageResource(R.drawable.liked);
                         tPost.likePost();
                         numberOfLikes.setText(""+(tPost.getlikes()));
-                        System.out.println("like.clicklist -> post with id: " + tPost.getPostID() + " and userName: "
-                                + tPost.getUserName() + " liked - number of likes = "+tPost.getlikes()+" updateVal = "+tPost.getUpdateVal()+" isClicked ="+tPost.getClicked());
-                        Log.d("like.clicklist", "post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() + " liked");
+
+                        if(deBug) {
+                            System.out.println("like.clicklist -> post with id: " + tPost.getPostID() + " and userName: "
+                                    + tPost.getUserName() + " liked - number of likes = " + tPost.getlikes() + " updateVal = " + tPost.getUpdateVal() + " isClicked =" + tPost.getClicked());
+                            Log.d("like.clicklist", "post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() + " liked");
+                        }
                     } else {
                         like.setImageResource(R.drawable.liked_not);
                         tPost.unlikePost();
                         numberOfLikes.setText(""+(tPost.getlikes()));
-                        System.out.println("UNlike.clicklist -> post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() +
-                                " liked- number of likes = "+tPost.getlikes()+" updateVal = "+tPost.getUpdateVal()+" isClicked ="+tPost.getClicked());
-                        Log.d("like.clicklist", "post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() + " UNliked");
+                        if(deBug) {
+                            System.out.println("UNlike.clicklist -> post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() +
+                                    " liked- number of likes = " + tPost.getlikes() + " updateVal = " + tPost.getUpdateVal() + " isClicked =" + tPost.getClicked());
+                            Log.d("like.clicklist", "post with id: " + tPost.getPostID() + " and userName: " + tPost.getUserName() + " UNliked");
+                        }
 
                     }
                 }
@@ -140,6 +146,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     }
 
     public static class PicturePostHolder extends GenericViewHolder<PicturePost> {
+
+        private boolean deBug = true;
 
         private TextView textViewUsername;
         private TextView textViewTimestamp;
@@ -163,7 +171,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 return;
             }
             textViewUsername.setText(pPost.getUserName());
-            textViewTimestamp.setText(pPost.getUniversalTimeStamp());
+            textViewTimestamp.setText(pPost.getFormattedUniversalTimestamp());
             imageViewPicture.setImageBitmap(pPost.getPicture());
             numberOfLikes.setText(""+pPost.getlikes());
             if(pPost.getClicked())
@@ -180,20 +188,22 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                         pPost.likePost();
                         numberOfLikes.setText(""+pPost.getlikes());
 
-                        System.out.println("like.clicklist -> post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
-                        Log.d("like.clicklist","post with id: "+pPost.getPostID()+" and userName: "+pPost.getUserName()+" liked");
+                        if(deBug) {
+                            System.out.println("like.clicklist -> post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
+                            Log.d("like.clicklist", "post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
+                        }
                     } else {
                         like.setImageResource(R.drawable.liked_not);
                         pPost.unlikePost();
                         numberOfLikes.setText(""+pPost.getlikes());
-
-                        System.out.println("UNlike.clicklist -> post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
-                        Log.d("like.clicklist","post with id: "+pPost.getPostID()+" and userName: "+pPost.getUserName()+" UNliked");
+                        if(deBug){
+                            System.out.println("UNlike.clicklist -> post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " liked");
+                            Log.d("like.clicklist", "post with id: " + pPost.getPostID() + " and userName: " + pPost.getUserName() + " UNliked");
+                        }
 
                     }
                 }
             });
         }
     }
-
 }

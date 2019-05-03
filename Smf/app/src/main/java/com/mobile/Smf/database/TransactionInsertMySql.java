@@ -51,35 +51,29 @@ public class TransactionInsertMySql implements Callable<Boolean> {
 
             con.commit();
 
-            System.out.println("TransactionInsertMySql -> Transation committed");
-            Log.d("TransactionInsertMySql", "Transation committed");
-
-            return true;
 
             } catch (ClassNotFoundException exce) { exce.printStackTrace(); System.out.println("failed in ClassNotFoundException TMSql");}
               catch (SQLException ex) { ex.printStackTrace();
-                  System.out.println("failed in SQLException TMSql");
-                    try {
-                        con.rollback(save1);
-                        return false;
-                        } catch(SQLException e){
-                            throw new RuntimeException("Failed to rollback changes " +
-                                "in TransactionInsertMySql with arguments:"+ Arrays.toString(input)+ "\n");
-                            }
-                    }
-
+                                    try {
+                                        con.rollback(save1);
+                                        return false;
+                                        } catch(SQLException e){
+                                            throw new RuntimeException("Failed to rollback changes " +
+                                                "in TransactionInsertMySql with arguments:"+ Arrays.toString(input)+ "\n");
+                                            }
+                                    }
         finally {
                 try {
                     for (int i = 0; i < input.length; i++) {
                         if (input[i] != null)
                                 input[i].close();
-                    }
+                        }
 
                     if(con != null)
                         con.close();
 
-                } catch (SQLException e) {e.printStackTrace(); System.out.println("failed in finally TMSql");}
-        }
+                    } catch (SQLException e) {e.printStackTrace(); System.out.println("failed in finally TMSql");}
+                }
         return true;
     }
 }

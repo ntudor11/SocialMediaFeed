@@ -53,6 +53,7 @@ public class Feed extends Observable {
 
     public void updateWithOlderPosts(){
         List<Post> newItems = datainterface.getUpdatedListOlder();
+        System.out.println("updateWithOlderPosts "+newItems);
         if (newItems != null){
             feed_as_list.addAll(newItems);
         }

@@ -56,12 +56,11 @@ public class MySql {
 
     //Interface
 
-
     public boolean checkIfValidLogin(String userName, String password) {
 
         boolean returnVal = false;
         try {
-        Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, String.format(Locale.getDefault(),
+            Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, String.format(Locale.getDefault(),
                 "SELECT userID, userName, password FROM Users WHERE userName = '%s' AND password = '%s';",
                         userName, password)));
 
@@ -84,7 +83,7 @@ public class MySql {
         Boolean returnVal = false;
 
         try {
-        Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass,
+            Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass,
                 String.format("SELECT COUNT(*) FROM Users WHERE username = '%s' OR email = '%s';", userName, email)));
 
             ResultSet rs = f.get();
@@ -107,13 +106,13 @@ public class MySql {
 
         try {
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, String.format(Locale.getDefault(),
-                    "SELECT * FROM Users WHERE userName = '%s';", userName)));
+                    "SELECT u.userID, u.userName, u.password, u.email, c.countryName, u.birthYear, u.countryID  FROM Users u " +
+                            "LEFT JOIN Countries c ON u.countryID = c.countryID WHERE userName = '%s';", userName)));
 
             ResultSet rs = f.get();
 
             rs.first();
-            returnVal = new User(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getInt(6));
-            //Todo sync this data to sqlite
+            returnVal = new User(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getInt(6),rs.getInt(7));
 
         } catch (InterruptedException e) { e.printStackTrace(); }
         catch (ExecutionException ex) { ex.printStackTrace(); }
@@ -125,35 +124,40 @@ public class MySql {
     public User addNewUser(String userName, String password, String email, String country, int birthYear) {
 
         User returnVal = null;
+        int id = 0;
+        int countryID = 0;
 
-        int id = -1;
+
         try {
-            Future<Boolean> f = service.submit(new InsertMySql(DB_URL, user, pass, String.format(Locale.getDefault(),
+                Future<Boolean> f = service.submit(new InsertMySql(DB_URL, user, pass, String.format(Locale.getDefault(),
                     "INSERT INTO Users (userName, password, email, countryID, birthYear) " +
                             "VALUES ('%s','%s','%s', " +
                             "(SELECT countryID FROM Countries WHERE countryName = '%s'), %d);",
                             userName, password, email, country, birthYear)));
 
-            if ( f.get()) {
+                if ( f.get()) {
                 //will refactor this to a sql function later on
-                Future<ResultSet> fx = service.submit(new queryMySql(DB_URL, user, pass,
-                        String.format(Locale.getDefault(), "SELECT userID FROM Users WHERE email = '%s' AND userName = '%s';", email, userName)));
-                ResultSet rs = fx.get();
-                rs.first();
-                id = rs.getRow();
-            }
+                    Future<ResultSet> fx = service.submit(new queryMySql(DB_URL, user, pass,
+                            String.format(Locale.getDefault(), "SELECT userID,countryID FROM Users WHERE email = '%s' AND userName = '%s';", email, userName)));
+                    ResultSet rs = fx.get();
 
-        } catch (InterruptedException e) { e.printStackTrace(); }
-          catch (ExecutionException ex) { ex.printStackTrace(); }
-          catch (SQLException exc) { exc.printStackTrace(); }
+                    rs.first();
+                    id = rs.getInt(1);
+                    countryID = rs.getInt(2);
 
-        if (id > 0)
-            returnVal = new User(id, userName, password, email, country, birthYear);
+                }
+
+            } catch (InterruptedException e) { e.printStackTrace(); }
+              catch (ExecutionException ex) { ex.printStackTrace(); }
+              catch (SQLException exc) { exc.printStackTrace(); }
+
+            if (id > 0 && countryID > 0)
+                returnVal = new User(id, userName, password, email, country, birthYear, countryID);
 
         return returnVal;
     }
 
-    // DEPRECATED
+    // DEPRECATED - DO NOT USE UNLESS QUERY AND LAST ARGUMENT IS FIXED
     public User getLoggedInUser(int userID) {
 
         User newUser = null;
@@ -166,7 +170,7 @@ public class MySql {
             rs.first();
             if(rs.getInt(1) == userID)
                 newUser = new User(rs.getInt(1), rs.getString(2), rs.getString(3),
-                        rs.getString(4), rs.getString(5), rs.getInt(6));
+                        rs.getString(4), rs.getString(5), rs.getInt(6),-1);
 
         } catch (InterruptedException e) {e.printStackTrace(); }
           catch (ExecutionException ex) {ex.printStackTrace();}
@@ -199,6 +203,7 @@ public class MySql {
     public boolean uploadPicturePost(int userID, Bitmap picture, long timestamp, String localTime, String universalTime) {
 
         boolean successfulTransaction = false;
+
         try{
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -226,7 +231,7 @@ public class MySql {
 
 
     public ArrayList<Post> getInitialPosts(int userID) {
-        //Timestamp t = new Timestamp();
+
         ArrayList<Post> returnList = new ArrayList<>();
 
         try {
@@ -238,7 +243,6 @@ public class MySql {
                     "LEFT JOIN PicturePosts pic ON p.postID = pic.postID LEFT JOIN Likes l ON p.postID = l.postID " +
                     "ORDER BY p.tStamp DESC LIMIT 10;",userID);
             if (!deBug) {
-                //System.out.println("getInitialPosts -> "+arg);
                 //Log.d("getInitialPosts",arg);
             }
 
@@ -248,6 +252,7 @@ public class MySql {
             rs.first();
             if(!rs.next())
                 return returnList;
+
             rs.first();
 
             while(!rs.isAfterLast()) {
@@ -268,10 +273,9 @@ public class MySql {
         }catch(ExecutionException e) {e.printStackTrace();}
         catch(InterruptedException ex) {ex.printStackTrace();}
         catch (SQLException exc) {exc.printStackTrace(); }
-    // REMOVE WHEN CLEANING UP
-        System.out.println("POSTCHECK!!!!!!!");
 
         if(deBug) {
+            System.out.println("POSTCHECK!!!!!!!");
             for (Post p : returnList) {
                 if (p.getPostType() == 0) {
                     System.out.println("id: " + p.getPostID() + " name: " + p.getUserName() + " TimeStamp: " + p.getTimeStamp() + " text: " + ((TextPost) p).getText()
@@ -292,9 +296,9 @@ public class MySql {
 
         try {
             String arg =  String.format(Locale.getDefault(),"SELECT p.postType, p.postID, u.userName, p.tStamp, " +
-                            "p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture IF(p.postID IN " +
+                            "p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture, IF(p.postID IN " +
                             "(SELECT postID FROM LikeRelationship WHERE LikeRelationship.postID = p.postID AND " +
-                            "LikeRelationship.userID = %d ), 'true', 'false') AS clicked FROM Posts p " +
+                            "LikeRelationship.userID = %d ), 1, 0) AS clicked FROM Posts p " +
                             "INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
                             "LEFT JOIN PicturePosts pic ON p.postID = pic.postID LEFT JOIN Likes l ON p.postID = l.postID " +
                             "WHERE p.tStamp > %d ORDER BY p.tStamp DESC LIMIT %d;",userID,timestamp,numberOfPosts);
@@ -335,12 +339,11 @@ public class MySql {
         try {
 
             String arg = String.format(Locale.getDefault(),
-            "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, pic.picture, l.likes," +
-                    "IF(p.postID IN (SELECT postID FROM LikeRelationship  WHERE LikeRelationship.postID = %d AND LikeRelationship.userID = %d ) , true, false) AS clicked " +
-                    "FROM Posts p INNER JOIN Users u ON p.userID = u.userID LEFT JOIN TextPosts t ON p.postID = t.postID " +
-                    "LEFT JOIN PicturePosts pic ON p.postID = pic.postID " +
-                    "LEFT JOIN Likes l ON p.postID = l.postID " +
-                    "WHERE p.tStamp < (SELECT tStamp FROM Posts WHERE postID = %d) " +
+            "SELECT p.postType, p.postID, u.userName, p.tStamp, p.universalTimeStamps, p.localTimeStamps, t.postText, " +
+                    "pic.picture, l.likes, IF(p.postID IN (SELECT postID FROM LikeRelationship WHERE LikeRelationship.postID = %d " +
+                    "AND LikeRelationship.userID = %d ) , 1, 0) AS clicked FROM Posts p INNER JOIN Users u ON p.userID = u.userID " +
+                    "LEFT JOIN TextPosts t ON p.postID = t.postID LEFT JOIN PicturePosts pic ON p.postID = pic.postID " +
+                    "LEFT JOIN Likes l ON p.postID = l.postID WHERE p.tStamp < (SELECT tStamp FROM Posts WHERE postID = %d) " +
                     "ORDER BY p.tStamp DESC LIMIT %d;",
                     oldestPostId,userID,oldestPostId,numberOfPosts);
 
@@ -349,7 +352,6 @@ public class MySql {
 
             rs.first();
 
-            //Todo if it breaks change boolean to int in query and use 0 an 1 to evaluate
             while(!rs.isAfterLast()) {
                 int eval = rs.getInt(1);
                 if(eval == 0) {
@@ -373,15 +375,13 @@ public class MySql {
     }
 
     /*
-     * Remember to do this in sqlite to
+     * TODO, do this in sqlite to
      * */
     @SuppressLint("DefaultLocale")
     public boolean addLikes(List<Point> likedPosts, int userID) {
         boolean returnVal = false;
 
         String[] args = new String[(likedPosts.size()*2)+3];
-
-        //System.out.println("SIZE OF args = "+args.length);
 
         args[0] = DB_URL;
         args[1] = user;
@@ -395,14 +395,15 @@ public class MySql {
                     likedPosts.get(i).x,likedPosts.get(i).y,likedPosts.get(i).y, userID);
             args[j++] = String.format("INSERT IGNORE INTO LikeRelationship (postID, userID) VALUES (%d,%d);",likedPosts.get(i).y,userID);
         }
-        if(deBug)
+        if(!deBug)
             System.out.println("ARGUMENTS FROM MYSQL TO TRANSACTIONS : "+Arrays.toString(args));
+
         try {
             Future<Boolean> f = service.submit(new TransactionInsertMySql(null, args));
 
             returnVal = f.get();
 
-        } catch (ExecutionException e) {e.printStackTrace();System.out.println("FAILS HERE");}
+        } catch (ExecutionException e) {e.printStackTrace();}
         catch (InterruptedException ex) {ex.printStackTrace();}
 
         return returnVal;
@@ -414,7 +415,6 @@ public class MySql {
     public List<Point> getLikes(List<Point> postIDsAtY) {
 
         if(!deBug) {
-            System.out.println("getLikes -> LIST SIZE CHECK: "+postIDsAtY.isEmpty());
             Log.d("getLikes","LIST SIZE CHECK: "+postIDsAtY.isEmpty());
         }
 
@@ -433,9 +433,6 @@ public class MySql {
 
         String arg = String.format( "SELECT postID,likes FROM Likes WHERE postID IN %s;",sb.toString());
 
-        if(deBug)
-            System.out.println(arg);
-
         try {
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL,user,pass,arg));
             ResultSet rs = f.get();
@@ -445,7 +442,7 @@ public class MySql {
                 returnList.add(new Point(rs.getInt(1),rs.getInt(2)));
                 rs.next();
             }
-            //System.out.println("RETURNLIST: "+returnList.toString());
+
         } catch (ExecutionException e) {e.printStackTrace();}
         catch (InterruptedException ex) {ex.printStackTrace();}
         catch (SQLException exc) {exc.printStackTrace();}
