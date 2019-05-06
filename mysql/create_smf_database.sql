@@ -8,14 +8,15 @@ USE smf;
 
 SELECT 'Creating tables ...' AS 'Print_Hack';
 
-DROP TABLE IF EXISTS Countries, Users, Posts, TextPosts, PicturePosts;
+DROP TABLE IF EXISTS Countries, Users, Posts, TextPosts, PicturePosts, Likes, LikeRelationship;
 
 CREATE TABLE Countries (
 countryID INT NOT NULL AUTO_INCREMENT,
 countryName VARCHAR(100) NOT NULL,
 PRIMARY KEY (countryID),
-UNIQUE (countryName)
-);
+UNIQUE (countryName))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 CREATE TABLE Users (
     userID INT NOT NULL AUTO_INCREMENT,
@@ -29,11 +30,11 @@ CREATE TABLE Users (
     PRIMARY KEY (userID),
     CONSTRAINT `fk_Users_countryID`
       FOREIGN KEY (countryID)
-      REFERENCES `smf`.`Countries` (`countryID`)
+      REFERENCES `smf`.`tempCountries` (`countryID`)
       ON DELETE NO ACTION
-      ON UPDATE CASCADE
-);
-
+      ON UPDATE CASCADE)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8;
 
 
 CREATE TABLE Posts(
@@ -46,10 +47,12 @@ CREATE TABLE Posts(
     PRIMARY KEY (postID),
     CONSTRAINT `fk_Posts_userID`
       FOREIGN KEY (userID)
-      REFERENCES `smf`.`Users` (`userID`)
+      REFERENCES `smf`.`tempUsers` (`userID`)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
+      ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8;
+
 
 CREATE TABLE TextPosts(
     postID INT NOT NULL,
@@ -57,10 +60,11 @@ CREATE TABLE TextPosts(
     PRIMARY KEY (postID),
     CONSTRAINT `fk_TextPosts_postID`
       FOREIGN KEY (postID)
-      REFERENCES `smf`.`Posts` (`postID`)
+      REFERENCES `smf`.`tempPosts` (`postID`)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
+      ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8
 
 
 CREATE TABLE PicturePosts(
@@ -69,10 +73,12 @@ CREATE TABLE PicturePosts(
     PRIMARY KEY (postID),
     CONSTRAINT `fk_PicturePosts_postID`
       FOREIGN KEY (postID)
-      REFERENCES `smf`.`Posts` (`postID`)
+      REFERENCES `smf`.`tempPosts` (`postID`)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
+      ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8
+
 
 CREATE TABLE Likes(
     postID INT NOT NULL,
@@ -81,11 +87,12 @@ CREATE TABLE Likes(
     UNIQUE (postID),
     CONSTRAINT `fk_Likes_postID`
       FOREIGN KEY (postID)
-      REFERENCES `smf`.`Posts` (`postID`)
+      REFERENCES `smf`.`tempPosts` (`postID`)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8
 
-);
 
 CREATE TABLE LikeRelationship(
     postID INT NOT NULL,
@@ -93,15 +100,17 @@ CREATE TABLE LikeRelationship(
     UNIQUE (postID,userID),
     CONSTRAINT `fk_LikeRelationship_postID`
       FOREIGN KEY (postID)
-      REFERENCES `smf`.`Posts` (`postID`)
+      REFERENCES `smf`.`tempPosts` (`postID`)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
     CONSTRAINT `fk_Likes_userID`
       FOREIGN KEY (userID)
-      REFERENCES `smf`.`Users` (`userID`)
+      REFERENCES `smf`.`tempUsers` (`userID`)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
+      ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8
+
 
 
 
@@ -217,14 +226,6 @@ DELIMITER;
 
 
 
-ALTER TABLE Users ADD CONSTRAINT `fk_Users_countryID`
-FOREIGN KEY (countryID) REFERENCES  `smf`.`Countries` (`countryID`)
-ON DELETE NO ACTION ON UPDATE CASCADE;
-
-ALTER TABLE smf.Users ADD CONSTRAINT fk_Users_countryID
-FOREIGN KEY (countryID) REFERENCES  smf.Countries (countryID)
-ON DELETE NO ACTION ON UPDATE CASCADE;
-
 --------------------------------------------------------------------------------
 -- LOG --
 
@@ -232,3 +233,5 @@ ON DELETE NO ACTION ON UPDATE CASCADE;
 --select * from information_schema.table_constraints where constraint_schema = 'YOUR_DB'
 
 --ALTER TABLE tbl_name CONVERT TO CHARACTER SET charset_name;
+--ALTER TABLE t1 ENGINE = InnoDB;
+--ALTER TABLE Countries CONVERT TO CHARACTER SET utf8;
