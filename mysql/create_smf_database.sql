@@ -26,9 +26,15 @@ CREATE TABLE Users (
     birthYear int NOT NULL,
     UNIQUE (userName),
     UNIQUE (email),
-    FOREIGN KEY (countryID) REFERENCES Countries (countryID),
-    PRIMARY KEY (userID)
+    PRIMARY KEY (userID),
+    CONSTRAINT `fk_Users_countryID`
+      FOREIGN KEY (countryID)
+      REFERENCES `smf`.`Countries` (`countryID`)
+      ON DELETE NO ACTION
+      ON UPDATE CASCADE
 );
+
+
 
 CREATE TABLE Posts(
     postID INT NOT NULL AUTO_INCREMENT,
@@ -37,36 +43,64 @@ CREATE TABLE Posts(
     tStamp BIGINT SIGNED NOT NULL,
     universalTimeStamps VARCHAR(35),
     localTimeStamps VARCHAR(35),
-    FOREIGN KEY (userID) REFERENCES Users (userID) ON DELETE CASCADE,
-    PRIMARY KEY (postID)
+    PRIMARY KEY (postID),
+    CONSTRAINT `fk_Posts_userID`
+      FOREIGN KEY (userID)
+      REFERENCES `smf`.`Users` (`userID`)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
 );
 
 CREATE TABLE TextPosts(
     postID INT NOT NULL,
     postText VARCHAR(145),
-    FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE
+    PRIMARY KEY (postID),
+    CONSTRAINT `fk_TextPosts_postID`
+      FOREIGN KEY (postID)
+      REFERENCES `smf`.`Posts` (`postID`)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
 );
 
 
 CREATE TABLE PicturePosts(
     postID INT NOT NULL,
     picture BLOB NOT NULL,
-    FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE
+    PRIMARY KEY (postID),
+    CONSTRAINT `fk_PicturePosts_postID`
+      FOREIGN KEY (postID)
+      REFERENCES `smf`.`Posts` (`postID`)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
 );
 
 CREATE TABLE Likes(
     postID INT NOT NULL,
     likes INT UNSIGNED NOT NULL DEFAULT 0,
-    FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE,
-    UNIQUE (postID)
+    PRIMARY KEY (postID),
+    UNIQUE (postID),
+    CONSTRAINT `fk_Likes_postID`
+      FOREIGN KEY (postID)
+      REFERENCES `smf`.`Posts` (`postID`)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+
 );
 
 CREATE TABLE LikeRelationship(
     postID INT NOT NULL,
     userID INT NOT NULL,
-    FOREIGN KEY (postID) REFERENCES Posts (postID) ON DELETE CASCADE,
-    FOREIGN KEY (userID) REFERENCES Users (userID) ON DELETE CASCADE,
-    UNIQUE (postID,userID)
+    UNIQUE (postID,userID),
+    CONSTRAINT `fk_LikeRelationship_postID`
+      FOREIGN KEY (postID)
+      REFERENCES `smf`.`Posts` (`postID`)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Likes_userID`
+      FOREIGN KEY (userID)
+      REFERENCES `smf`.`Users` (`userID`)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
 );
 
 
@@ -168,3 +202,33 @@ BEGIN
 END //
 DELIMITER;
 
+--------------------------------------------------------------------------------
+
+-- below is testing and not apart of the script
+
+--INSERT INTO Users (userName,password,email,countryID,birthYear)
+--VALUES ('TestDude','123','bla@bla.dk',1,1985);
+--INSERT INTO Users (userName,password,email,countryID,birthYear) VALUES ('Thomas','123','whatever@bla.dk',1,1985);
+
+--INSERT INTO Posts (userID, postType,tStamp,universalTimeStamps,localTimeStamps)
+--VALUES (1,0,123456,'1234','1234');
+
+--INSERT INTO TextPosts (postID,postText) VALUES (1,'whatever');
+
+
+
+ALTER TABLE Users ADD CONSTRAINT `fk_Users_countryID`
+FOREIGN KEY (countryID) REFERENCES  `smf`.`Countries` (`countryID`)
+ON DELETE NO ACTION ON UPDATE CASCADE;
+
+ALTER TABLE smf.Users ADD CONSTRAINT fk_Users_countryID
+FOREIGN KEY (countryID) REFERENCES  smf.Countries (countryID)
+ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--------------------------------------------------------------------------------
+-- LOG --
+
+-- get all constraints in your db
+--select * from information_schema.table_constraints where constraint_schema = 'YOUR_DB'
+
+--ALTER TABLE tbl_name CONVERT TO CHARACTER SET charset_name;

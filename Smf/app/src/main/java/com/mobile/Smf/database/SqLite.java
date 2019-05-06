@@ -63,8 +63,8 @@ public class SqLite extends SQLiteOpenHelper {
         res = db.rawQuery("select * from Profile_info ", null);
 
             //and other tables if
-            db.execSQL(String.format("DROP TABLE IF EXISTS %s", "Profile_info"));
-            //dropAllTables(db);
+            //db.execSQL(String.format("DROP TABLE IF EXISTS %s", "Profile_info"));
+            dropAllTables();
         } catch(SQLException e) {e.printStackTrace();}
         onCreate(db);
         ContentValues contentValues = new ContentValues();
@@ -90,24 +90,22 @@ public class SqLite extends SQLiteOpenHelper {
 
             mydatabase.execSQL("CREATE TABLE IF NOT EXISTS Profile_info (id int, name VARCHAR(100) NOT NULL, " +
                     "password VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, " +
-                    "country VARCHAR(100), birthYear int, countryID int );");
+                    "country VARCHAR(100), birthYear int, countryID int, UNIQUE (id));");
 
             mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PostsSync (postID int NOT NULL, postType int NOT NULL," +
-                    "userName VARCHAR(100), tStamp INTEGER NOT NULL, uniTime VARCHAR(14), locTime VARCHAR(14));");
+                    "userName VARCHAR(100), tStamp INTEGER NOT NULL, uniTime VARCHAR(14), locTime VARCHAR(14), UNIQUE (postID));");
 
-            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS TextPostsSync (postID int NOT NULL, postText VARCHAR(145) NOT NULL);");
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS TextPostsSync (postID int NOT NULL, postText VARCHAR(145) NOT NULL, UNIQUE(postID));");
 
-            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PicturePostsSync (postID int NOT NULL, picture BLOB NOT NULL);");
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS PicturePostsSync (postID int NOT NULL, picture BLOB NOT NULL, UNIQUE (postID));");
 
-            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS LikesSync (postID int NOT NULL, likes int NOT NULL, clicked int NOT NULL);");
-
+            mydatabase.execSQL("CREATE TABLE IF NOT EXISTS LikesSync (postID int NOT NULL, likes int NOT NULL, clicked int NOT NULL, UNIQUE(postID));");
 
         } catch(SQLException e) {e.printStackTrace();}
     }
 
 
     //Interface
-
 
     public boolean syncProfileInfoFromMySql(User user) {
 
@@ -136,19 +134,22 @@ public class SqLite extends SQLiteOpenHelper {
     public User getLoggedInUser() {
         User returnVal = null;
 
-        try {
-            Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
+        if(checkTable("Profile_info")) {
+            //printAllTables();
 
-            if (((res == null) || (res.getCount() == 0))) {
-                System.out.println("sqlite returning null");
-                return returnVal;
-            }
+            try {
+                Cursor res = mydatabase.rawQuery("SELECT * FROM Profile_info;", null);
 
-            res.moveToFirst();
-            returnVal = new User(res.getInt(0), res.getString(1), res.getString(2),
-                    res.getString(3), res.getString(4), res.getInt(5),res.getInt(6));
+                if (((res == null) || (res.getCount() == 0))) {
+                    return returnVal;
+                }
 
-            } catch (SQLException e) {e.printStackTrace();}
+                res.moveToFirst();
+                returnVal = new User(res.getInt(0), res.getString(1), res.getString(2),
+                        res.getString(3), res.getString(4), res.getInt(5), res.getInt(6));
+
+            } catch (SQLException e) { e.printStackTrace();}
+        }
 
         return returnVal;
     }
@@ -180,6 +181,7 @@ public class SqLite extends SQLiteOpenHelper {
 
 
     public boolean dropAllTables() {
+        //printAllTables();
         Cursor cursor = mydatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
         try {
             List<String> tables = new ArrayList<>(cursor.getCount());
@@ -208,10 +210,11 @@ public class SqLite extends SQLiteOpenHelper {
         boolean returnVal = false;
 
 
-        String argPost = "INSERT INTO PostsSync (postID,postType,userName,tStamp,uniTime,locTime) VALUES (?,?,?,?,?,?);";
-        String argTextPost = "INSERT INTO TextPostsSync (postID,postText) VALUES (?,?);";
-        String argPicturePost = "INSERT INTO PicturePostsSync (postID, picture) VALUES (?,?);";
-        String argLikes = "INSERT INTO LikesSync (postID, likes) VALUES (?,?);";
+        String argPost = "INSERT OR IGNORE INTO PostsSync (postID,postType,userName,tStamp,uniTime,locTime) VALUES (?,?,?,?,?,?);";
+        String argTextPost = "INSERT OR IGNORE INTO TextPostsSync (postID,postText) VALUES (?,?);";
+        String argPicturePost = "INSERT OR IGNORE INTO PicturePostsSync (postID, picture) VALUES (?,?);";
+        String argLikes = "INSERT OR IGNORE INTO LikesSync (postID, likes, clicked) VALUES (?,?,?);";
+
         try {
             mydatabase.beginTransaction();
             SQLiteStatement stmtPost = mydatabase.compileStatement(argPost);
@@ -398,13 +401,39 @@ public class SqLite extends SQLiteOpenHelper {
     }
 
 
-    //REMOVE
-    public void checkTables() {
 
+    public boolean checkTable(String table) {
             Cursor c = mydatabase.rawQuery(
-                    "SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';",null);
-            c.moveToFirst();
-            print(c);
+                    String.format("SELECT name FROM sqlite_master WHERE type = 'table' AND name = '%s';",table),null);
+            return c.getCount() != 0;
+    }
+
+    private void printAllTables() {
+        if(checkTable("Profile_info")) {
+
+            Cursor c1 = mydatabase.rawQuery(
+                    "SELECT * FROM Profile_info;", null);
+            System.out.println("Profile_info:");
+            print(c1);
+            Cursor c2 = mydatabase.rawQuery(
+                    "SELECT * FROM PostsSync;", null);
+            System.out.println("PostsSync:");
+            print(c2);
+            Cursor c3 = mydatabase.rawQuery(
+                    "SELECT * FROM TextPostsSync;", null);
+            System.out.println("TextPostsSync:");
+            print(c3);
+            Cursor c4 = mydatabase.rawQuery(
+                    "SELECT * FROM PicturePostsSync;", null);
+            System.out.println("PicturePostsSync:");
+            print(c4);
+            Cursor c5 = mydatabase.rawQuery(
+                    "SELECT * FROM LikesSync;", null);
+            System.out.println("LikesSync:");
+            print(c5);
+        } else
+            System.out.println("No tables to print");
+
     }
 
 

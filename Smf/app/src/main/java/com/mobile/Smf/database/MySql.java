@@ -243,7 +243,7 @@ public class MySql {
                     "LEFT JOIN PicturePosts pic ON p.postID = pic.postID LEFT JOIN Likes l ON p.postID = l.postID " +
                     "ORDER BY p.tStamp DESC LIMIT 10;",userID);
             if (!deBug) {
-                //Log.d("getInitialPosts",arg);
+                Log.d("getInitialPosts",arg);
             }
 
             Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
@@ -258,6 +258,7 @@ public class MySql {
             while(!rs.isAfterLast()) {
                 int eval = rs.getInt(1);
                 if(eval == 0) {
+                    System.out.println("Likes: "+rs.getInt(9));
                     returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7),
                             rs.getString(6),rs.getString(5),rs.getInt(9),rs.getInt(10) != 0 ));
                 } else if (eval == 1) {
@@ -347,24 +348,35 @@ public class MySql {
                     "ORDER BY p.tStamp DESC LIMIT %d;",
                     oldestPostId,userID,oldestPostId,numberOfPosts);
 
-            Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
-            ResultSet rs = f.get();
+            ResultSet rs = null;
 
-            rs.first();
+            try {
+                Future<ResultSet> f = service.submit(new queryMySql(DB_URL, user, pass, arg));
+                rs = f.get();
 
-            while(!rs.isAfterLast()) {
-                int eval = rs.getInt(1);
-                if(eval == 0) {
-                    returnList.add(new TextPost(rs.getInt(2), rs.getString(3),rs.getLong(4),rs.getString(7),
-                            rs.getString(6),rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
-                } else if (eval == 1) {
-                    byte[] bytePic = rs.getBytes(8);
-                    Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
-                    returnList.add(new PicturePost(rs.getInt(2), rs.getString(3),rs.getLong(4),pic, rs.getString(6),
-                            rs.getString(5),rs.getInt(9),rs.getInt(10) != 0));
+                if (rs.isBeforeFirst()) {
+
+                    rs.first();
+
+                    while (!rs.isAfterLast()) {
+
+                        int eval = rs.getInt(1);
+                        if (eval == 0) {
+                            returnList.add(new TextPost(rs.getInt(2), rs.getString(3), rs.getLong(4), rs.getString(7),
+                                    rs.getString(6), rs.getString(5), rs.getInt(9), rs.getInt(10) != 0));
+                        } else if (eval == 1) {
+                            byte[] bytePic = rs.getBytes(8);
+                            Bitmap pic = BitmapFactory.decodeByteArray(bytePic, 0, bytePic.length);
+                            returnList.add(new PicturePost(rs.getInt(2), rs.getString(3), rs.getLong(4), pic, rs.getString(6),
+                                    rs.getString(5), rs.getInt(9), rs.getInt(10) != 0));
+                        }
+
+                        rs.next();
+                    }
                 }
-
-                rs.next();
+            } finally{
+                if(rs != null)
+                    rs.close();
             }
 
         }catch(ExecutionException e) {e.printStackTrace();}
@@ -381,6 +393,8 @@ public class MySql {
     public boolean addLikes(List<Point> likedPosts, int userID) {
         boolean returnVal = false;
 
+        System.out.println(likedPosts.toString());
+
         String[] args = new String[(likedPosts.size()*2)+3];
 
         args[0] = DB_URL;
@@ -390,11 +404,24 @@ public class MySql {
         int j = 3;
         for(int i = 0; i < likedPosts.size(); i++) {
 
-            args[j++] = String.format("UPDATE Likes SET likes = likes + %d WHERE postID = %d AND postID NOT IN " +
+            if(likedPosts.get(i).x > 0) {
+            args[j++] = String.format("UPDATE Likes SET likes = (likes + %d) WHERE postID = %d AND postID NOT IN " +
                     "(SELECT postID FROM LikeRelationship WHERE postID = %d AND userID = %d);",
                     likedPosts.get(i).x,likedPosts.get(i).y,likedPosts.get(i).y, userID);
-            args[j++] = String.format("INSERT IGNORE INTO LikeRelationship (postID, userID) VALUES (%d,%d);",likedPosts.get(i).y,userID);
+
+
+                args[j++] = String.format("INSERT IGNORE INTO LikeRelationship (postID, userID) VALUES (%d,%d);", likedPosts.get(i).y, userID);
+                System.out.println("fell into positive LikeRelationship case");
+            }
+            else {
+                args[j++] = String.format("UPDATE Likes SET likes = (likes + %d) WHERE postID = %d AND postID IN " +
+                                "(SELECT postID FROM LikeRelationship WHERE postID = %d AND userID = %d);",
+                        likedPosts.get(i).x,likedPosts.get(i).y,likedPosts.get(i).y, userID);
+
+                args[j++] = String.format("DELETE FROM LikeRelationship WHERE postID = %d AND userID = %d;", likedPosts.get(i).y, userID);
+            }
         }
+        System.out.println("args: "+Arrays.toString(args));
         if(!deBug)
             System.out.println("ARGUMENTS FROM MYSQL TO TRANSACTIONS : "+Arrays.toString(args));
 

@@ -19,13 +19,13 @@ import com.mobile.Smf.model.TextPost;
 import java.util.List;
 
 /*
-* Polymorphic adapter for multiple types of posts, inspired by Gilbert Christopher's implmentation found at:
-* https://medium.com/@gilbertchristopher/a-recyclerview-with-multiple-view-type-22619a5ad365
-* */
+ * Polymorphic adapter for multiple types of posts, inspired by Gilbert Christopher's implmentation found at:
+ * https://medium.com/@gilbertchristopher/a-recyclerview-with-multiple-view-type-22619a5ad365
+ * */
 
 /*
-* TODO, fix bug with binds overlapping with likes. most likely we need to call executePendingBindings() somewhere
-* */
+ * TODO, fix bug with binds overlapping with likes. most likely we need to call executePendingBindings() somewhere
+ * */
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.GenericViewHolder> {
 

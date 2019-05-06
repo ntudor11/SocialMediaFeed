@@ -24,6 +24,7 @@ public abstract class Post implements PostTypeInterface {
         this.universalTimeStamp = universalTime;
         this.likes = likes;
         this.clicked = clicked;
+        System.out.println("Inside post "+postID+" "+this.likes);
     }
 
     public int getPostID() {
@@ -47,16 +48,18 @@ public abstract class Post implements PostTypeInterface {
     public void likePost() {
         if (!clicked) {
             likes++;
-            updateVal++;
-            clicked = true;
+            updateVal = 1;
+            if(!clicked)
+                clicked = true;
         }
     }
 
     public void unlikePost() {
         if (clicked) {
-            likes--;
-            updateVal--;
-            clicked = false;
+            likes-- ;
+            updateVal = -1;
+            if(clicked)
+                clicked = false;
         }
     }
 
@@ -67,6 +70,10 @@ public abstract class Post implements PostTypeInterface {
     public boolean getClicked() {return clicked;}
 
     public int getUpdateVal() {return updateVal;}
+
+    public void clearUpdateVal() {
+        updateVal = 0;
+    }
 
     public String getFormattedUniversalTimestamp() {
         StringBuilder sb = new StringBuilder();

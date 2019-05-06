@@ -246,6 +246,7 @@ public class DataInterface {
         if(isConnected()) {
             olderPosts = mySql.getSpecificNumberOfLowerPosts(10, postsInUse.get(postsInUse.size() - 1).getPostID(),user.getId());
             newerPosts = mySql.getSpecificNumberOfNewerPosts(1,postsInUse.get(0).getTimeStamp(),user.getId());
+
         }
 
         backgroundThread = new Thread(() -> {
@@ -331,9 +332,8 @@ public class DataInterface {
     }
 
 
-    public void checkSqLiteTables(){
-        System.out.println("checkSqLiteTables");
-        sqLite.checkTables();
+    public boolean checkSqLiteTable(String table){
+        return sqLite.checkTable(table);
     }
 
     /*

@@ -69,10 +69,11 @@ public class ProfileFragment extends Fragment {
                 dataInterface.setScrollFlag();
                 dataInterface.interruptBackgroundThread();
                 if (dataInterface.logCurrentUserOut()){
-                    dataInterface.checkSqLiteTables();
-                    Toast.makeText(getContext(),"You have been logged out",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getContext(), LoginActivity.class);
-                    startActivity(intent);
+                    if(!dataInterface.checkSqLiteTable("profile_info")) {
+                        Toast.makeText(getContext(), "You have been logged out", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getContext(), LoginActivity.class);
+                        startActivity(intent);
+                    }
                 } else {
                     Toast.makeText(getContext(),"Could not log out...",Toast.LENGTH_SHORT).show();
                 }

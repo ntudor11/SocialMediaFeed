@@ -201,46 +201,49 @@ public class FeedFragment extends Fragment implements Observer {
                         Thread.sleep(5000);
                     } catch(InterruptedException e) {e.printStackTrace();}
 
-                    List<Post> copiedList = ((List<Post>) ((ArrayList) feed.getFeedAsList()).clone());
-                    List<Point> valuesToUpdate = new ArrayList<>();
+                        List<Post> copiedList = ((List<Post>) ((ArrayList) feed.getFeedAsList()).clone());
+                        List<Point> valuesToUpdate = new ArrayList<>();
 
-                    for(Post p : copiedList) {
-                        if(p.getUpdateVal() != 0)
-                            valuesToUpdate.add(new Point(p.getUpdateVal(),p.getPostID()));
-                    }
+                        for (Post p : copiedList) {
+                            if (p.getUpdateVal() != 0)
+                                valuesToUpdate.add(new Point(p.getUpdateVal(), p.getPostID()));
+                        }
 
-                    if(debug)
-                        System.out.println("valuesToUpdate list: "+ Arrays.toString(valuesToUpdate.toArray()));
+                        if (debug)
+                            System.out.println("valuesToUpdate list: " + Arrays.toString(valuesToUpdate.toArray()));
 
-                    if(!valuesToUpdate.isEmpty())
-                        if(dataInterface.updateLikes(valuesToUpdate))
-                            Log.d("likeUpdater","likes committed to database");
+                        if (!valuesToUpdate.isEmpty())
+                            if (dataInterface.updateLikes(valuesToUpdate))
+                                Log.d("likeUpdater", "likes committed to database");
 
-                    try{
-                        Thread.sleep(2000);
-                    } catch(InterruptedException e) {e.printStackTrace();}
+                        /*try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }*/
 
-                    List<Point> updatedLikes;
-                    if(!valuesToUpdate.isEmpty()) {
-                        updatedLikes = dataInterface.getUpdatedLikes(valuesToUpdate);
+                        List<Point> updatedLikes;
+                        if (!valuesToUpdate.isEmpty()) {
+                            updatedLikes = dataInterface.getUpdatedLikes(valuesToUpdate);
 
-                        Log.d("likeUpdater", "updatedLikes returned " + updatedLikes);
+                            Log.d("likeUpdater", "updatedLikes returned " + updatedLikes);
 
-                        List<Post> feed_as_list = feed.getFeedAsList();
-                        for (Point p : updatedLikes) {
-                            int id = p.x;
-                            for (Post po : feed_as_list) {
-                                if (po.getPostID() == id) {
-                                    po.setLikes(p.y);
-                                    break;
+                            List<Post> feed_as_list = feed.getFeedAsList();
+                            for (Point p : updatedLikes) {
+                                int id = p.x;
+                                for (Post po : feed_as_list) {
+                                    if (po.getPostID() == id) {
+                                        po.setLikes(p.y);
+                                        po.clearUpdateVal();
+                                        break;
+                                    }
                                 }
                             }
+                            publishProgress();
+                            Log.d("likeUpdater", "likes updated in feed");
                         }
-                        publishProgress();
-                        Log.d("likeUpdater", "likes updated in feed");
                     }
 
-                }
             return null;
         }
 
